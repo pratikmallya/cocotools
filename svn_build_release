@@ -1,0 +1,57 @@
+#!/bin/csh
+
+if( "$1" == "" ) then
+	echo "usage: svn_build_release NAME"
+	exit 1
+endif
+
+set URL = `svn info | grep URL`
+set URL = $URL[2]
+set REL = $URL:h/versions/$1
+
+svn mkdir                         $REL          -m "built release $1"
+svn copy  $URL/examples               $REL/examples -m "built release $1"
+svn copy  $URL/toolbox                $REL/toolbox  -m "built release $1"
+svn copy  $URL/doc                    $REL/doc      -m "built release $1"
+svn copy  $URL/LICENSE  $URL/README   $REL/         -m "built release $1"
+
+echo "export revision $1 with"
+echo "svn export $REL coco"
+
+exit
+
+svn mkdir                         $REL/examples -m "built release $1"
+svn copy  $URL/examples/bratu     $REL/examples -m "built release $1"
+svn copy  $URL/examples/coneA     $REL/examples -m "built release $1"
+svn copy  $URL/examples/coneB     $REL/examples -m "built release $1"
+svn copy  $URL/examples/coneC     $REL/examples -m "built release $1"
+svn copy  $URL/examples/coneD     $REL/examples -m "built release $1"
+svn copy  $URL/examples/cusp      $REL/examples -m "built release $1"
+svn copy  $URL/examples/impact    $REL/examples -m "built release $1"
+svn copy  $URL/examples/pitchfork $REL/examples -m "built release $1"
+svn copy  $URL/examples/pneta     $REL/examples -m "built release $1"
+svn copy  $URL/examples/pnet_imf  $REL/examples -m "built release $1"
+svn copy  $URL/examples/pnet_rs   $REL/examples -m "built release $1"
+svn copy  $URL/examples/pwlin     $REL/examples -m "built release $1"
+svn copy  $URL/examples/sphere    $REL/examples -m "built release $1"
+svn copy  $URL/examples/tor       $REL/examples -m "built release $1"
+
+svn mkdir                          $REL/toolbox  -m "built release $1"
+svn copy  $URL/toolbox/startup.m   $REL/toolbox  -m "built release $1"
+svn copy  $URL/toolbox/cocopath.m  $REL/toolbox  -m "built release $1"
+svn copy  $URL/toolbox/alcont      $REL/toolbox  -m "built release $1"
+svn copy  $URL/toolbox/coco        $REL/toolbox  -m "built release $1"
+svn copy  $URL/toolbox/collocation $REL/toolbox  -m "built release $1"
+svn copy  $URL/toolbox/covering    $REL/toolbox  -m "built release $1"
+svn copy  $URL/toolbox/cover1d     $REL/toolbox  -m "built release $1"
+svn copy  $URL/toolbox/coverkd     $REL/toolbox  -m "built release $1"
+svn copy  $URL/toolbox/fdm         $REL/toolbox  -m "built release $1"
+svn copy  $URL/toolbox/hscont      $REL/toolbox  -m "built release $1"
+svn copy  $URL/toolbox/pocont      $REL/toolbox  -m "built release $1"
+svn copy  $URL/toolbox/mh_imfcont  $REL/toolbox  -m "built release $1"
+
+svn copy  $URL/doc                $REL/doc  -m "built release $1"
+
+echo "export revision $1 with"
+echo "svn export $REL coco"
+

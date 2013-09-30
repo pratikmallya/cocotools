@@ -1,0 +1,46 @@
+# more information on:
+http://svnbook.red-bean.com
+
+# create a working copy (checkout)
+svn checkout --username USER URL/coco coco
+URL = https://dynamics1.mechse.illinois.edu/srv/svn/repos/coco
+
+# check status, no access to remote data base
+svn status [FILE ...]
+
+# check status and for updates in remote data base
+svn status -u [FILE ...]
+
+# update (local) working copy:
+svn update [FILE ...]
+
+# view (local) differences since last update:
+svn diff FILE
+
+# commit (local) changes:
+svn commit -m "message" [FILE ...]
+
+# add/delete/create files and directories:
+svn add|delete|mkdir FILE ...
+
+# copy/move files and directories:
+svn copy|move SRC DST
+
+###############################################
+
+# automatic property setting:
+# see the user-config file ~/.subversion/config
+# relevant fragments:
+
+[miscellany]
+enable-auto-props = yes
+
+[auto-props]
+*.tex = svn:eol-style=native;svn:keywords=Date Revision Author HeadURL Id
+*.m = svn:eol-style=native;svn:keywords=Date Revision Author HeadURL Id
+*.txt = svn:eol-style=native;svn:keywords=Date Revision Author HeadURL Id
+Makefile = svn:eol-style=native;svn:keywords=Date Revision Author HeadURL Id
+*.png = svn:mime-type=image/png
+*.jpg = svn:mime-type=image/jpeg
+*.eps = svn:mime-type=application/postscript
+*.ps = svn:mime-type=application/postscript

@@ -1,0 +1,1687 @@
+
+\documentclass{article}
+\usepackage{amsfonts}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%TCIDATA{OutputFilter=LATEX.DLL}
+%TCIDATA{Created=Friday, February 08, 2008 13:22:05}
+%TCIDATA{LastRevised=Saturday, August 16, 2008 16:04:28}
+%TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
+%TCIDATA{<META NAME="DocumentShell" CONTENT="General\SW\Blank - Standard LaTeX Article">}
+%TCIDATA{CSTFile=LaTeX article (bright).cst}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{acknowledgement}[theorem]{Acknowledgement}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{axiom}[theorem]{Axiom}
+\newtheorem{case}[theorem]{Case}
+\newtheorem{claim}[theorem]{Claim}
+\newtheorem{conclusion}[theorem]{Conclusion}
+\newtheorem{condition}[theorem]{Condition}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{criterion}[theorem]{Criterion}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{example}[theorem]{Example}
+\newtheorem{exercise}[theorem]{Exercise}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{notation}[theorem]{Notation}
+\newtheorem{problem}[theorem]{Problem}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{remark}[theorem]{Remark}
+\newtheorem{solution}[theorem]{Solution}
+\newtheorem{summary}[theorem]{Summary}
+\newenvironment{proof}[1][Proof]{\textbf{#1.} }{\ \rule{0.5em}{0.5em}}
+\input{tcilatex}
+
+\oddsidemargin 0in
+\topmargin -0.5in
+\textheight 9in
+\textwidth 6.5in
+
+\begin{document}
+
+\title{A new development platform for parameter continuation and bifurcation
+analysis in nonlinear dynamical systems}
+\author{Harry Dankowicz$^{1}$ and Frank Schilder$^{2}$ \\
+%EndAName
+$^{1}$Department of Mechanical Science and Engineering \\
+University of Illinois at Urbana-Champaign \\
+Urbana, IL 61801, USA \\
+danko@illinois.edu \\
+$^{2}$Department of Mathematics \\
+University of Surrey \\
+Guildford, GU2 7XH, United Kingdom \\
+f.schilder@surrey.ac.uk}
+\maketitle
+
+\begin{abstract}
+\textbf{Key Words:} Bifurcation analysis, Parameter continuation, Software
+development, \textsc{coco}
+\end{abstract}
+
+\section{Introduction}
+
+A combination of theoretical and computational tools for bifurcation
+analysis of dynamical systems offers distinct advantages to brute-force
+forward-time simulation [9]. Such a combination enables prediction of
+behavior and response without the need for a vast collection of simulations
+based at distinct initial conditions. More importantly, it may offer an
+understanding of, and an underlying explanation for, changes in behavior and
+response that are not available through simple simulation.
+
+A comprehensive bifurcation analysis of a dynamical system seeks to
+establish the existence of characteristic classes of responses, such as
+equilibria or periodic responses. In each case, this involves locating and
+tracking families of such responses under variations in system parameters in
+a process known as \emph{continuation} [1,5,8,10]. The study of the
+robustness of particular system responses further emphasizes parameter
+values where such families merge or terminate or where the stability
+characteristics of the corresponding responses change.
+
+A number of computational tools are available for bifurcation analysis of
+characteristic classes of response, such as equilibria, periodic
+trajectories, homo- or heteroclinic trajectories between equilibria and/or
+periodic trajectories, quasiperiodic trajectories on invariant tori, and
+trajectories on associated stable and unstable manifolds. These include
+general algebraic and two-point boundary-value solvers for ordinary
+differential equations, such as \textsc{auto} (and specialized drivers, such
+as \textsc{homcont} [2], \textsc{slidecont} [3], and \textsc{tc-hat} [13]), 
+\textsc{matcont} [4], and \textsc{sympercon} [14]; boundary-value solvers
+for delay differential equations, such as \textsc{dde-biftool} [6] and 
+\textsc{pdde-cont} [12]; tools for large-scale systems, such as \textsc{loca}
+[11]; and implementations in \textsc{matlab} [7].
+
+This presentation outlines a recent software development effort in \textsc{%
+matlab} of a set of core toolboxes for parameter continuation of algebraic
+and multi-point boundary-value problems referred to collectively as \textsc{%
+coco}. In contrast with the packages referenced above, \textsc{coco} has
+been formulated with emphasis on full transparency, modularity, and great
+generality giving developers of bifurcation packages that rely on this
+platform great flexibility and full access to the entirety of continuation
+data. In addition, \textsc{coco} makes extensive use of vectorization and
+bandwidth reduction for sparse-matrix operations to guarantee an optimal
+execution time at or close to what can be expected of interpreted code.
+Finally, \textsc{coco} includes a unique implementation of user-defined
+functions that allows the continuation of solutions with nontrivial
+properties, for example, periodic orbits with a given stability margin. The
+presentation discusses the philosophy behind the software development, the
+strategy employed in its implementation, and a number of model examples,
+including continuation of periodic orbits in hybrid dynamical systems.
+
+This material is based upon work supported by the National Science
+Foundation under Grant nos. 0237370 (HD) and 0635469 (HD) and by the
+Engineering and Physical Sciences Research Council under Grant no.
+EP/D063906/1 (FS).
+
+\section{Mathematical foundation}
+
+The core of the \textsc{coco} application consists of a \emph{constructor}
+that is employed to formulate a well-posed system of nonlinear algebraic
+equations, an iterative \emph{corrector} that is employed to locate
+individual points on the solution manifold, and a \emph{continuer} that is
+employed to generate an approximate covering mesh for the solution manifold
+during parameter continuation. The versatility of the \textsc{coco}
+application lies in the generality with which variables, parameters, and
+additional problem- or user-defined monitor functions are handled by the 
+\textsc{coco} constructor.
+
+\subsection{Illustration}
+
+Consider the functions%
+\[
+\psi \left( x,y,z\right) =z^{2}-x^{2}-y^{2}
+\]%
+and%
+\[
+\pi \left( y,z,\alpha \right) =y\sin \alpha +\left( z-1\right) \cos \alpha 
+\]%
+in terms of the variables $x$, $y$, $z$, and $\alpha $. Roots of $\psi $
+correspond to points in the three-dimensional space parametrized by $x$, $y$%
+, and $z$ on the double circular cone with apex at the origin and symmetric
+about the $z$-axis with a $90^{\circ }$ opening angle. For each $\alpha $, $%
+\pi $ evaluates to the dot product between the unit vector $\left( 0,\sin
+\alpha ,\cos \alpha \right) $ and the position vector from the point $\left(
+0,0,1\right) $ to the point $\left( x,y,z\right) $, such that $\left| \pi
+\left( y,z,\alpha \right) \right| $ equals the distance from the point $%
+\left( x,y,z\right) $ to the plane through the point $\left( 0,0,1\right) $
+and perpendicular to the vector $\left( 0,\sin \alpha ,\cos \alpha \right) $%
+. Simultaneous roots of $\psi $ and $\pi $ thus correspond to points of
+intersection of the cone and the corresponding plane (cf. Figure 1).\FRAME{%
+fhFU}{2.6654in}{3.039in}{0pt}{\Qcb{Simultaneous roots of $\protect\psi $ and 
+$\protect\pi $ correspond to poits of intersectio of the cone and the
+corresponding plane.}}{}{cone.jpg}{\special{language "Scientific Word";type
+"GRAPHIC";maintain-aspect-ratio TRUE;display "ICON";valid_file "F";width
+2.6654in;height 3.039in;depth 0pt;original-width 4.6994in;original-height
+5.3662in;cropleft "0.1202909";croptop "0.9457805";cropright
+"0.9673136";cropbottom "0.0986235";filename 'figs/cone.jpg';file-properties
+"XNPEU";}}
+
+Consider the following tasks:
+
+\begin{description}
+\item[Task I.] \emph{Given an initial approximation }$\left( x^{\ast
+},y^{\ast },z^{\ast }\right) $\emph{\ for a point on the cone, locate a
+nearby point }$\left( x,y,z\right) \approx \left( x^{\ast },y^{\ast
+},z^{\ast }\right) $\emph{\ on the cone with desired accuracy. }To allow for
+the application of an iterative root-solver, the equation $\psi \left(
+x,y,z\right) =0$ must be suitably augmented to ensure a non-singular
+linearization at the sought-after solution. At the very least, the number of
+equations $\dim _{eq}$ must equal the number of variables $\dim _{var}=3$,
+here necessitating the imposition of two additional constraints on the
+variables $x$, $y$, and $z$. As an example, the linearization of the function%
+\begin{equation}
+F\left( x,y,z\right) =\left( 
+\begin{array}{c}
+\psi \left( x,y,z\right)  \\ 
+x-x^{\ast } \\ 
+y-y^{\ast }%
+\end{array}%
+\right)   \label{eq: task i}
+\end{equation}%
+is non-singular provided that $z\neq 0$ at the sought-after solution. A
+root-solver may now be employed to determine a root of $F$ corresponding to
+a point on the cone with $x=x^{\ast }$, $y=y^{\ast }$ and $z\approx z^{\ast }
+$.
+
+\item[Task II.] \emph{Given an initial approximation }$\left( x^{\ast
+},y^{\ast },z^{\ast }\right) $\emph{\ for a point of intersection of the
+cone and the plane given by }$\alpha =\alpha ^{\ast }$\emph{, locate a
+nearby point }$\left( x,y,z\right) \approx \left( x^{\ast },y^{\ast
+},z^{\ast }\right) $\emph{\ of intersection of the cone and the plane given
+by a nearby }$\alpha \approx \alpha ^{\ast }$\emph{.} Since, here, $\dim
+_{var}=4$, it follows that the equations $\psi \left( x,y,z\right) =\pi
+\left( y,z,\alpha \right) =0$ must be supplemented by the imposition of two
+additional constraints on the variables $x$, $y$, $z$, and $\alpha $. As an
+example, the linearization of the function%
+\begin{equation}
+F\left( x,y,z,\alpha \right) =\left( 
+\begin{array}{c}
+\psi \left( x,y,z\right)  \\ 
+\pi \left( y,z,\alpha \right)  \\ 
+x-x^{\ast } \\ 
+\alpha -\alpha ^{\ast }%
+\end{array}%
+\right)   \label{eq: task ii a)}
+\end{equation}%
+is non-singular provided that $y\cos \alpha +z\sin \alpha \neq 0$ at the
+sought-after solution. A root-solver may now be employed to determined a
+root of $F$ corresponding to a point of intersection of the cone with $%
+x=x^{\ast }$, $y\approx y^{\ast }$, and $z\approx z^{\ast }$, and the plane
+given by $\alpha =\alpha ^{\ast }$. Alternatively, the linearization of the
+function%
+\begin{equation}
+F\left( x,y,z,\alpha \right) =\left( 
+\begin{array}{c}
+\psi \left( x,y,z\right)  \\ 
+\pi \left( y,z,\alpha \right)  \\ 
+x-x^{\ast } \\ 
+y-y^{\ast }%
+\end{array}%
+\right)   \label{eq: task ii b)}
+\end{equation}%
+is non-singular provided that $z,y\cos \alpha +\left( 1-z\right) \sin \alpha
+\neq 0$ at the sought-after solution. A root-solver may now be employed to
+determined a root of $F$ corresponding to a point of intersection of the
+cone with $x=x^{\ast }$, $y=y^{\ast }$, and $z\approx z^{\ast }$, and the
+plane given by $\alpha \approx \alpha ^{\ast }$.
+\end{description}
+
+Inspired by the above discussion, a fundamental objective of the \textsc{coco%
+} constructor is to establish a general-purpose function $F$ that can be
+suitably restricted to solve each of the tasks posed above. To this end,
+consider the function%
+\[
+\tilde{F}\left( x,y,z,\alpha ,p_{0},p_{1},p_{2},p_{3}\right) =\left( 
+\begin{array}{c}
+\psi \left( x,y,z\right)  \\ 
+\pi \left( y,z,\alpha \right) -p_{0} \\ 
+x-p_{1} \\ 
+y-p_{2} \\ 
+\alpha -p_{3}%
+\end{array}%
+\right) .
+\]%
+The restriction 
+\[
+F=\left. \tilde{F}\right| _{p_{1}=x^{\ast },p_{2}=y^{\ast },p_{3}=\alpha
+^{\ast }}
+\]%
+for some $\alpha ^{\ast }$ is then equivalent to Eq. (\ref{eq: task i}). In
+particular, the linearization of $F$ is again non-singular provided that $%
+z\neq 0$ at the sought-after solution. A root-solver may now be employed to
+determine a root of $F$ corresponding to a value $p_{0}=\pi \left(
+y,z,\alpha \right) $ where $\alpha =\alpha ^{\ast }$ and a point on the cone
+with $x=x^{\ast }$, $y=y^{\ast }$, and $z\approx z^{\ast }$. In this case,
+the value of $\pi $ at the sought-after solution is a by-product of the
+root-finding algorithm.
+
+Similarly, the restrictions 
+\[
+F_{1}=\left. \tilde{F}\right| _{p_{0}=0,p_{1}=x^{\ast },p_{3}=\alpha ^{\ast
+}}
+\]%
+and 
+\[
+F_{2}=\left. \tilde{F}\right| _{p_{0}=0,p_{1}=x^{\ast },p_{2}=y^{\ast }}
+\]%
+are equivalent to Eqs. (\ref{eq: task ii a)}) and (\ref{eq: task ii b)}),
+respectively. In particular, the linearizations of $F_{1}$ and $F_{2}$ are
+again non-singular provided that $y\cos \alpha +z\sin \alpha \neq 0$ or $%
+z,y\cos \alpha +\left( 1-z\right) \sin \alpha \neq 0$, respectively, at the
+sought-after solution. Finally, a root-solver may be employed to determine a
+root of $F_{1}$ corresponding to a value $p_{2}=y$ and a point of
+intersection of the cone with $x=x^{\ast }$, $y\approx y^{\ast }$, and $%
+z\approx z^{\ast }$ and the plane given by $\alpha =\alpha ^{\ast }$.
+Alternatively, a root-solver may be employed to determine a root of $F_{2}$
+corresponding to a value $p_{3}=\alpha $ and a point of intersection of the
+cone with $x=x^{\ast }$, $y=y^{\ast }$, and $z\approx z^{\ast }$ and the
+plane given by $\alpha \approx \alpha ^{\ast }$, respectively.
+
+\subsection{Generalizations}
+
+\textsc{coco} generalizes the formalism of the previous section to arbitrary
+problem and variable dimension. To this end, let $\xi \in \mathbb{R}^{n}$
+and $\rho \in \mathbb{R}^{m}$ and denote by $f:\mathbb{R}^{n}\times \mathbb{R%
+}^{m}\rightarrow \mathbb{R}^{n}$ and $g:\mathbb{R}^{n}\times \mathbb{R}%
+^{m}\rightarrow \mathbb{R}^{k}$ two sufficiently smooth vector-valued
+functions. Let $\tilde{g}:\mathbb{R}^{n}\times \mathbb{R}^{m}\rightarrow 
+\mathbb{R}^{k+m}$ be given by%
+\[
+\tilde{g}\left( \xi ,\rho \right) =\left( 
+\begin{array}{c}
+g\left( \xi ,\rho \right)  \\ 
+\rho 
+\end{array}%
+\right) 
+\]%
+and consider the function $\tilde{F}:\mathbb{R}^{n}\times \mathbb{R}%
+^{m}\times \mathbb{R}^{k+m}\rightarrow \mathbb{R}^{n+k+m}$, where%
+\[
+\tilde{F}\left( \xi ,\rho ,\tilde{\eta}\right) =\left( 
+\begin{array}{c}
+f\left( \xi ,\rho \right)  \\ 
+\tilde{g}\left( \xi ,\rho \right) -\tilde{\eta}%
+\end{array}%
+\right) 
+\]%
+with rectangular Jacobian%
+\[
+\partial _{\left( \xi ,\rho ,\tilde{\eta}\right) }\tilde{F}\left( \xi ,\rho ,%
+\tilde{\eta}\right) =\left( 
+\begin{array}{ccc}
+\partial _{\xi }f\left( \xi ,\rho \right)  & \partial _{\rho }f\left( \xi
+,\rho \right)  & 0 \\ 
+\partial _{\xi }\tilde{g}\left( \xi ,\rho \right)  & \partial _{\rho }\tilde{%
+g}\left( \xi ,\rho \right)  & -I_{k+m}%
+\end{array}%
+\right) 
+\]%
+where $I_{k+m}$ denotes the $\left( k+m\right) \times \left( k+m\right) $
+identity matrix and $0$ the (appropriately dimensioned) null matrix.
+
+\subsubsection{Initialization}
+
+Suppose that there exists a combination $\xi =\xi ^{\ast }$ and $\rho =\rho
+^{\ast }$ such that $f\left( \xi ^{\ast },\rho ^{\ast }\right) =0$, and let $%
+\tilde{\eta}^{\ast }=\tilde{g}\left( \xi ^{\ast },\rho ^{\ast }\right) $.
+Denote by $\mathcal{M}$ the co-dimension-$m$ manifold through $\tilde{\eta}^{\ast }$ obtained by fixing $m$ components of $\tilde{\eta}$ and trivially
+parametrized by $\xi $, $\rho $, and the remaining $k$ components $\eta $ of 
+$\tilde{\eta}$. Suppose that the linearization of the restriction $F=\left. 
+\tilde{F}\right| _{\mathcal{M}}$ at $\xi =\xi ^{\ast }$, $\rho =\rho ^{\ast
+} $, and $\eta =\eta ^{\ast }$ is non-singular. It follows from the
+inverse-function theorem that there exist neighborhoods $U\ni $ $\left( 
+\begin{array}{ccc}
+\xi ^{\ast } & \rho ^{\ast } & \eta ^{\ast }
+\end{array}
+\right) ^{T}$ and $V\ni 0$, such that $F:U\rightarrow V$ is one-to-one and
+onto and, consequently, that $\xi =\xi ^{\ast }$ and $\rho =\rho ^{\ast }$
+is a locally unique root for the \emph{zero-problem} $f$ with $\tilde{\eta}
+^{\ast }=\tilde{g}\left( \xi ^{\ast },\rho ^{\ast }\right) $.
+
+Alternatively, suppose that $f\left( \xi ^{\left( 0\right) },\rho ^{\left(
+0\right) }\right) \approx 0$ and $\tilde{\eta}^{\left( 0\right) }\approx 
+\tilde{g}\left( \xi ^{\left( 0\right) },\rho ^{\left( 0\right) }\right) $
+for some $\xi ^{\left( 0\right) }$, $\rho ^{\left( 0\right) }$, and $\tilde{
+\eta}^{\left( 0\right) }$ and denote by $\mathcal{M}$ the co-dimension-$m$
+manifold through $\tilde{\eta}^{\left( 0\right) }$ obtained by fixing $m$
+components of $\tilde{\eta}$ and trivially parametrized by $\xi $, $\rho $,
+and the remaining $k$ components $\eta $ of $\tilde{\eta}$. Provided that
+there exists a nearby root of $F=\left. \tilde{F}\right| _{\mathcal{M}}$ at
+which the linearization is non-singular, one step of an iterative
+root-solver may now be applied to $F$ to yield an improved approximation $
+\xi ^{\left( 1\right) }$, $\rho ^{\left( 1\right) }$, and $\eta ^{\left(
+1\right) }$.
+
+\begin{example}
+In the notation of the previous section, let $\xi =z$, $\rho =\left( 
+\begin{array}{ccc}
+x & y & \alpha 
+\end{array}%
+\right) ^{T}$, $f\left( \xi ,\rho \right) =\psi \left( x,y,z\right) $, and $%
+g\left( \xi ,\rho \right) =\pi \left( y,z,\alpha \right) $ and suppose that $%
+\psi \left( x^{\ast },y^{\ast },z^{\ast }\right) =0$ for some $x^{\ast }$, $%
+y^{\ast }$, and $z^{\ast }$. Then, for some $\alpha ^{\ast }$, 
+\[
+F\left( \xi ,\rho ,\eta \right) =\left. \tilde{F}\left( \xi ,\rho ,\tilde{%
+\eta}\right) \right| _{\tilde{\eta}=\left( \eta ,x^{\ast },y^{\ast },\alpha
+^{\ast }\right) }=\left( 
+\begin{array}{c}
+\psi \left( x,y,z\right)  \\ 
+\pi \left( y,z,\alpha \right) -\eta  \\ 
+x-x^{\ast } \\ 
+y-y^{\ast } \\ 
+\alpha -\alpha ^{\ast }%
+\end{array}%
+\right) \Rightarrow \left| \partial _{\left( \xi ,\rho ,\eta \right)
+}F\left( \xi ^{\ast },\rho ^{\ast },\eta ^{\ast }\right) \right| =2z^{\ast }
+\]%
+and it follows from the previous section that, as long as $z^{\ast }\neq 0$,
+the inverse-function theorem guarantees that $x=x^{\ast }$, $y=y^{\ast }$, $%
+z=z^{\ast }$, $\alpha =\alpha ^{\ast }$, and $\eta =\eta ^{\ast }=\pi \left(
+y^{\ast },z^{\ast },\alpha ^{\ast }\right) $ is a locally unique root of $F$.
+\end{example}
+
+\begin{example}
+Suppose, instead, that $\psi \left( x^{\ast },y^{\ast },z^{\ast }\right)
+=\pi \left( y^{\ast },z^{\ast },\alpha ^{\ast }\right) =0$ for some $x^{\ast
+}$, $y^{\ast }$, $z^{\ast }$, and $\alpha ^{\ast }$. Then,%
+\[
+F\left( \xi ,\rho ,\eta \right) =\left. \tilde{F}\left( \xi ,\rho ,\tilde{%
+\eta}\right) \right| _{\tilde{\eta}=\left( 0,x^{\ast },\eta ,\alpha ^{\ast
+}\right) }=\left( 
+\begin{array}{c}
+\psi \left( x,y,z\right)  \\ 
+\pi \left( y,z,\alpha \right)  \\ 
+x-x^{\ast } \\ 
+y-\eta  \\ 
+\alpha -\alpha ^{\ast }%
+\end{array}%
+\right) \Rightarrow \left| \partial _{\left( \xi ,\rho ,\eta \right)
+}F\left( \xi ^{\ast },\rho ^{\ast },\eta ^{\ast }\right) \right| =-2\left(
+y^{\ast }\cos \alpha ^{\ast }+z^{\ast }\sin \alpha ^{\ast }\right) 
+\]%
+and it follows from the previous section that, as long as $y^{\ast }\cos
+\alpha ^{\ast }+z^{\ast }\sin \alpha ^{\ast }\neq 0$, the inverse-function
+theorem guarantees that $x=x^{\ast }$, $y=y^{\ast }$, $z=z^{\ast }$, $\alpha
+=\alpha ^{\ast }$, and $\eta =\eta ^{\ast }=y^{\ast }$ is a locally unique
+root of $F$.
+\end{example}
+
+In the special case that$\ \mathcal{M}$ is obtained by fixing the last $m$
+components of $\tilde{\eta}$, the linearization of $F$ at $\xi =\xi ^{\ast }$%
+, $\rho =\rho ^{\ast }$, and $\eta =\eta ^{\ast }$ is non-singular if and
+only if the linearization of $\left. f\right| _{\rho =\rho ^{\ast }}$ at $%
+\xi =\xi ^{\ast }$ is non-singular.
+
+\subsubsection{Continuation}
+
+Suppose again that there exists a combination $\xi =\xi ^{\ast }$ and $\rho
+=\rho ^{\ast }$ such that $f\left( \xi ^{\ast },\rho ^{\ast }\right) =0$,
+and let $\tilde{\eta}^{\ast }=\tilde{g}\left( \xi ^{\ast },\rho ^{\ast
+}\right) $. Denote by $\mathcal{M}$ the co-dimension-$m-j$ manifold through $%
+\tilde{\eta}^{\ast }$ obtained by fixing $m-j$ components of $\tilde{\eta}$
+and trivally parametrized by $\xi $, $\rho $, and the remaining $k+j$
+components $\eta $ of $\tilde{\eta}$. Suppose that there exists a function $%
+h:\mathbb{R}^{n}\times \mathbb{R}^{m}\times \mathbb{R}^{k+j}\times \mathbb{R}%
+^{j}\rightarrow \mathbb{R}^{j}$, such that $h\left( \xi ^{\ast },\rho ^{\ast
+},\eta ^{\ast },0\right) =0$ and such that the linearization $\partial
+_{\left( \xi ,\rho ,\eta \right) }F\left( \xi ,\rho ,\eta ,\lambda \right) $
+of the function%
+\begin{equation}
+F\left( \xi ,\rho ,\eta ,\lambda \right) =\left( 
+\begin{array}{c}
+\left. \tilde{F}\right| _{\mathcal{M}}\left( \xi ,\rho ,\eta \right) \\ 
+h\left( \xi ,\rho ,\eta ,\lambda \right)%
+\end{array}%
+\right)  \label{eq: Continuation}
+\end{equation}%
+is non-singular at $\xi =\xi ^{\ast }$, $\rho =\rho ^{\ast }$, $\eta =\eta
+^{\ast }$, and $\lambda =0$. Since 
+\[
+F\left( \xi ^{\ast },\rho ^{\ast },\eta ^{\ast },0\right) =0, 
+\]%
+it follows by the implicit-function theorem that there exists locally unique
+functions $\xi \left( \lambda \right) $, $\rho \left( \lambda \right) $, and 
+$\eta \left( \lambda \right) $ for $\lambda \approx 0$, such that $\xi
+\left( 0\right) =\xi ^{\ast }$, $\rho \left( 0\right) =\rho ^{\ast }$, and $%
+\eta \left( 0\right) =\eta ^{\ast }$ and%
+\[
+F\left( \xi \left( \lambda \right) ,\rho \left( \lambda \right) ,\eta \left(
+\lambda \right) ,\lambda \right) =0. 
+\]
+
+In particular, suppose that%
+\begin{equation}
+h\left( \xi ,\rho ,\eta ,\lambda \right) =V^{T}\cdot \left( 
+\begin{array}{c}
+\xi -\xi ^{\ast } \\ 
+\rho -\rho ^{\ast } \\ 
+\eta -\eta ^{\ast }%
+\end{array}%
+\right) -\lambda   \label{eq: hlinear}
+\end{equation}%
+satisfies the non-singularity condition for some rank-$j$ matrix $V$. It
+follows that the point $\left( \xi \left( \lambda \right) ,\rho \left(
+\lambda \right) ,\eta \left( \lambda \right) \right) $ lies at the
+intersection of $j$ hyperplanes determined by the components of $\lambda $
+and with normal vectors given by the columns of $V$. Moreover, for $\lambda
+\approx 0$, the columns of the matrix%
+\[
+W=\left( \partial _{\left( \xi ,\rho ,\eta \right) }F\left( \xi \left(
+\lambda \right) ,\rho \left( \lambda \right) ,\eta \left( \lambda \right)
+,\lambda \right) \right) ^{-1}\cdot \left( 
+\begin{array}{c}
+0 \\ 
+I_{j}%
+\end{array}%
+\right) 
+\]%
+span the $j$-dimensional nullspace of the linearization of $\left. \tilde{F}%
+\right| _{\mathcal{M}}$ at $\xi =\xi \left( \lambda \right) $, $\rho =\rho
+\left( \lambda \right) $, and $\eta =\eta \left( \lambda \right) $.
+
+As a special case, choose $V$ such that%
+\[
+h\left( \xi ,\rho ,\eta ,\lambda \right) =\hat{\eta}-\hat{\eta}^{\ast
+}-\lambda ,
+\]%
+where $\hat{\eta}$ denotes some subset of $j$ components of $\eta $. It
+follows that $\hat{\eta}\left( \lambda \right) =\hat{\eta}^{\ast }+\lambda $
+and the case when $\lambda =0$ is equivalent to the task of initialization
+described previously. Alternatively, suppose that the $j$ columns of the
+matrix $V$ are a basis for the nullspace of the linearization of the
+restriction $\left. \tilde{F}\right| _{\mathcal{M}}$ at $\xi =\xi ^{\ast }$, 
+$\rho =\rho ^{\ast }$, and $\eta =\eta ^{\ast }$. In this case, the $j$%
+-dimensional solution manifold of the equation $\left. \tilde{F}\right| _{%
+\mathcal{M}}\left( \xi ,\rho ,\eta \right) =0$ is locally represented as a
+graph over the tangent space at $\left( \xi ^{\ast },\rho ^{\ast },\eta
+^{\ast }\right) $ parametrized by $\lambda $.
+
+\begin{example}
+\label{y continuation}In the notation of the previous section, let $\xi =z$, 
+$\rho =\left( 
+\begin{array}{ccc}
+x & y & \alpha%
+\end{array}%
+\right) ^{T}$, $f\left( \xi ,\rho \right) =\psi \left( x,y,z\right) $, and $%
+g\left( \xi ,\rho \right) =\pi \left( y,z,\alpha \right) $ and suppose that $%
+\psi \left( x^{\ast },y^{\ast },z^{\ast }\right) =0$ for some $x^{\ast }$, $%
+y^{\ast }$, and $z^{\ast }$. Then, for some $\alpha ^{\ast }$ and provided
+that $z^{\ast }\neq 0$, the nullspace of the linearization of the
+restriction $\left. \tilde{F}\left( \xi ,\rho ,\tilde{\eta}\right) \right| _{%
+\tilde{\eta}=\left( \eta _{0},x^{\ast },\eta _{1},\alpha ^{\ast }\right) }$
+at $\xi =\xi ^{\ast }$, $\rho =\rho ^{\ast }$, and $\eta =\eta ^{\ast }$ is
+spanned by the column matrix%
+\[
+\left( 
+\begin{array}{c}
+y^{\ast } \\ 
+0 \\ 
+z^{\ast } \\ 
+0 \\ 
+y^{\ast }\cos \alpha ^{\ast }+z^{\ast }\sin \alpha ^{\ast } \\ 
+z^{\ast }%
+\end{array}%
+\right) . 
+\]%
+The implicit-function theorem guarantees the existence of a locally unique
+root of the augmented vector-valued function in Eq. (\ref{eq: Continuation})
+for each value of $\lambda \approx 0$, where $\mathcal{M}=\left\{ \tilde{\eta%
+}=\left( \eta _{0},x^{\ast },\eta _{1},\alpha ^{\ast }\right) \right\} $.
+Given an initial prediction $x\approx x^{\ast }$, $y\approx y^{\ast }$, $%
+z\approx z^{\ast }$, $\alpha \approx \alpha ^{\ast }$, $\eta _{0}\approx \pi
+\left( y^{\ast },z^{\ast },\alpha ^{\ast }\right) $, and $\eta _{1}\approx
+y^{\ast }$ for some $\lambda \approx 0$, an iterative root solver may now be
+employed to locate the corresponding root including $\eta _{0}\left( \lambda
+\right) =\pi \left( y\left( \lambda \right) ,z\left( \lambda \right) ,\alpha
+\left( \lambda \right) \right) $.
+\end{example}
+
+\begin{example}
+\label{alpha and y continuation}Suppose, instead, that $\psi \left( x^{\ast
+},y^{\ast },z^{\ast }\right) =\pi \left( y^{\ast },z^{\ast },\alpha ^{\ast
+}\right) =0$ for some $x^{\ast }$, $y^{\ast }$, $z^{\ast }$, and $\alpha
+^{\ast }$. Then, unless $x^{\ast 2}-1=y^{\ast }=z^{\ast }-1=\sin \alpha
+^{\ast }=0$, the nullspace of the linearization of the restriction $\left. 
+\tilde{F}\left( \xi ,\rho ,\tilde{\eta}\right) \right| _{\tilde{\eta}=\left(
+0,x^{\ast },\eta _{0},\eta _{1}\right) }$ at $\xi =\xi ^{\ast }$, $\rho
+=\rho ^{\ast }$, and $\eta =\eta ^{\ast }$ is spanned by the column matrix%
+\[
+\left( 
+\begin{array}{c}
+y^{\ast }\left( y^{\ast }\cos \alpha ^{\ast }-\left( z^{\ast }-1\right) \sin
+\alpha ^{\ast }\right) \\ 
+0 \\ 
+z^{\ast }\left( y^{\ast }\cos \alpha ^{\ast }-\left( z^{\ast }-1\right) \sin
+\alpha ^{\ast }\right) \\ 
+-y^{\ast }\cos \alpha ^{\ast }-z^{\ast }\sin \alpha ^{\ast } \\ 
+z^{\ast }\left( y^{\ast }\cos \alpha ^{\ast }-\left( z^{\ast }-1\right) \sin
+\alpha ^{\ast }\right) \\ 
+-y^{\ast }\cos \alpha ^{\ast }-z^{\ast }\sin \alpha ^{\ast }%
+\end{array}%
+\right) . 
+\]%
+The implicit-function theorem guarantees the existence of a locally unique
+root of the augmented vector-valued function in Eq. (\ref{eq: Continuation})
+for each value of $\lambda \approx 0$, where $\mathcal{M}=\left\{ \tilde{\eta%
+}=\left( 0,x^{\ast },\eta _{0},\eta _{1}\right) \right\} $. Given an initial
+prediction $x\approx x^{\ast }$, $y\approx y^{\ast }$, $z\approx z^{\ast }$, 
+$\alpha \approx \alpha ^{\ast }$, $\eta _{0}\approx y^{\ast }$, and $\eta
+_{1}\approx \alpha ^{\ast }$ for some $\lambda \approx 0$, an iterative root
+solver may now be employed to locate the corresponding root.\newline
+\newline
+Similarly, unless $x^{\ast }=y^{\ast }=z^{\ast }=\cos \alpha ^{\ast }=0$,
+the nullspace of the linearization of the restriction $\left. \tilde{F}%
+\left( \xi ,\rho ,\tilde{\eta}\right) \right| _{\tilde{\eta}=\left( 0,\eta
+_{0},\eta _{1},\alpha ^{\ast }\right) }$ at $\xi =\xi ^{\ast }$, $\rho =\rho
+^{\ast }$, and $\eta =\eta ^{\ast }$ is spanned by the column matrix%
+\[
+\left( 
+\begin{array}{c}
+x^{\ast }\tan \alpha ^{\ast } \\ 
+y^{\ast }+z^{\ast }\tan \alpha ^{\ast } \\ 
+-x^{\ast } \\ 
+0 \\ 
+y^{\ast }+z^{\ast }\tan \alpha ^{\ast } \\ 
+-x^{\ast }%
+\end{array}%
+\right) 
+\]%
+The implicit-function theorem guarantees the existence of a locally unique
+root of the augmented vector-valued function in Eq. (\ref{eq: Continuation})
+for each value of $\lambda \approx 0$, where $\mathcal{M}=\left\{ \tilde{\eta%
+}=\left( 0,\eta _{0},\eta _{1},\alpha ^{\ast }\right) \right\} $. Given an
+initial prediction $x\approx x^{\ast }$, $y\approx y^{\ast }$, $z\approx
+z^{\ast }$, $\alpha \approx \alpha ^{\ast }$, $\eta _{0}\approx x^{\ast }$,
+and $\eta _{1}\approx y^{\ast }$ for some $\lambda \approx 0$, an iterative
+root solver may now be employed to locate the corresponding root.
+\end{example}
+
+In the special case that $\mathcal{M}$ is obtained by fixing $m-j$ of the
+last $m$ components of $\tilde{\eta}$, the linearization of $\left. \tilde{F}%
+\right| _{\mathcal{M}}$ at $\xi =\xi ^{\ast }$, $\rho =\rho ^{\ast }$, and $%
+\eta =\eta ^{\ast }$ has a $j$-dimensional nullspace if and only if the
+matrix 
+\[
+\left( 
+\begin{array}{cc}
+\partial _{\xi }f\left( \xi ^{\ast },\rho ^{\ast }\right) & \partial _{\rho
+_{0}}f\left( \xi ^{\ast },\rho ^{\ast }\right)%
+\end{array}%
+\right) 
+\]
+has a $j$-dimensional nullspace, where $\rho _{0}$ refers to the first $j$
+components of $\rho $.
+
+\subsection{Continuation with constraints}
+
+Suppose again that there exists a combination $\xi =\xi ^{\ast }$, $\rho
+=\rho ^{\ast }$ such that $f\left( \xi ^{\ast },\rho ^{\ast }\right) =0$ and
+let $\tilde{\eta}^{\ast }=\tilde{g}\left( \xi ^{\ast },\rho ^{\ast }\right) $%
+. There exist $\binom{k+m}{m-j}$ distinct co-dimension-$m-j$ manifolds $%
+\mathcal{M}$ through $\tilde{\eta}^{\ast }$ corresponding to fixing the
+value of $m-j$ components of $\tilde{\eta}$ and trivially parametrized by $%
+\xi $, $\rho $, and the remaining $k+j$ components of $\tilde{\eta}$. If the
+point $\left( \xi ^{\ast },\rho ^{\ast },\tilde{\eta}^{\ast }\right) $ has
+been reached during continuation along one of these manifolds, continuation
+can proceed along one of the other manifolds simply by redefining $\eta $ to
+refer to the corresponding $k+j$ components of $\tilde{\eta}$. This manifold
+switching allows one to fix or release values of individual components of $%
+\tilde{g}$, and therefore of $g$ and $\rho $, respectively.
+
+Suppose that, initially, continuation occurs along a manifold $\mathcal{M}$
+obtained by fixing $m-j$ components of the last $m$ components of $\tilde{%
+\eta}$. This corresponds to keeping the values of $m-j$ components of $\rho $
+constant during continuation while locating roots of the zero problem $f$
+and monitoring the values of the remaining components of $\tilde{g}$ through
+the value of $\eta $. At any stage during continuation, manifold switching
+could then occur by releasing one component of $\rho $ and fixing one of the
+components of $g$, corresponding to co-dimension-one parameter continuation.
+This corresponds to constraining the continuation to maintain a constant
+value of the selected component of $g$. Repeated application of this
+procedure is possible until all components of $\rho $ have been released
+affording a means for at most co-dimension-$m-j$ continuation.
+
+An example of this analysis is given by the transition between the two
+examples above. In particular, in Example \ref{y continuation}, continuation
+along the $\mathcal{M}=\left\{ \tilde{\eta}=\left( \eta _{0},x^{\ast },\eta
+_{1},\alpha ^{\ast }\right) \right\} $ manifold generates a sequence of
+points on the cone for which $x=x^{\ast }$. A zero-crossing of the value of $%
+\eta _{0}$ then corresponds to a point of intersection of the cone and the
+plane given by $\alpha =\alpha ^{\ast }$. In the second part of Example \ref%
+{alpha and y continuation}, this serves as the starting point for a
+continuation along the $\mathcal{M}=\left\{ \tilde{\eta}=\left( 0,\eta
+_{0},\eta _{1},\alpha ^{\ast }\right) \right\} $ manifold that generates a
+sequence of points of intersection between the cone and the plane given by $%
+\alpha =\alpha ^{\ast }$ (cf. left panel of Figure 2 and Appendix B). \FRAME{%
+fhFU}{4.9856in}{2.0332in}{0pt}{\Qcb{Left panel: the result of continuation
+of points on the cone with $x=x^{\ast }$ under variations in $y$ (blue
+dots); detection of points of intersection with planes corresponding to
+distinct values of $\protect\alpha $ (red dots); and continuation of points
+of intersection between the cone and plane under variations in $x$ and $y$
+for each such value of $\protect\alpha $ (green dots). Right panel: the
+result of continuation of points on the cone with $x=x^{\ast }$ under
+variations in $y$ (blue dots); detection of a point of intersection with the
+plane corresponding to $\protect\alpha ^{\ast }$ (green dot); continuation
+of points on the plane corresponding to $\protect\alpha ^{\ast }$ with $%
+x=x^{\ast }$ under variations in $y$ (black dots); detection of a point of
+intersection with the cone (red dot); and continuation of points on the cone
+with $x=x^{\ast }$ under variations in $y$ (blue dots).}}{}{cones.eps}{%
+\special{language "Scientific Word";type "GRAPHIC";maintain-aspect-ratio
+TRUE;display "ICON";valid_file "F";width 4.9856in;height 2.0332in;depth
+0pt;original-width 4.9571in;original-height 2.0055in;cropleft "0";croptop
+"1";cropright "1";cropbottom "0";filename 'figs/cones.eps';file-properties
+"XNPEU";}}
+
+Alternatively, suppose that $n=0$ and let $\rho =\left( 
+\begin{array}{cccc}
+z & x & y & \alpha 
+\end{array}%
+\right) ^{T}$ and $g\left( \xi ,\rho \right) =\left( 
+\begin{array}{cc}
+\psi \left( x,y,z\right)  & \pi \left( y,z,\alpha \right) 
+\end{array}%
+\right) ^{T}$. Continuation along the manifold $\mathcal{M}=\left\{ \tilde{%
+\eta}=\left( 0,\eta _{0},\eta _{1},x^{\ast },\eta _{2},\alpha ^{\ast
+}\right) \right\} $ then generates a sequence of points on the cone for
+which $x=x^{\ast }$. Again, a zero-crossing of the value of $\eta _{0}$
+corresponds to a point of intersection of the cone and the plane given by $%
+\alpha =\alpha ^{\ast }$. This may serve as the starting point for a
+subsequent continuation along the manifold $\mathcal{M}=\left\{ \tilde{\eta}%
+=\left( \eta _{0},0,\eta _{1},x^{\ast },\eta _{2},\alpha ^{\ast }\right)
+\right\} $ that generates a sequence of points on the plane with $\alpha
+=\alpha ^{\ast }$ for which $x=x^{\ast }$ (cf. right panel of Figure 2 and
+Appendix B).
+
+As a more intriguing example, consider the problem of monitoring the
+eigenvalues of the jacobian matrix $A=\partial _{\xi }f$, of detecting
+zero-crossings of the real parts of these eigenvalues, and of
+higher-codimension continuation of families of roots of $f$ corresponding to
+such zero-crossings. For this purpose, augment $\xi $ to include the real
+and imaginary entries of the matrix $Q$ and the nontrivial entries of the
+upper triangular matrix $U$ and augment $f$ by the entries of the matrix%
+\[
+A-Q^{\ast }UQ 
+\]%
+and the upper triangular entries of the matrix%
+\[
+Q^{\ast }Q-I. 
+\]%
+The roots of the augmented $f$ then include the roots of the original
+function $f$ as well as the entries in the Schur decomposition of $A$ in
+terms of a unitary matrix $Q$ and an upper triangular matrix $U$. In
+particular, the entries of $U$ along the diagonal are the eigenvalues of $A$
+repeated according to their multiplicity.
+
+As long as the eigenvalues of $A$ are distinct, the Schur decomposition is
+unique up to reordering of the columns of $Q$ and a corresponding
+permutation of the entries of $U$. For a given permutation, the real and
+imaginary parts of the entries of $U$ are smooth functions of the system
+parameters.\ In particular, the real parts of the diagonal entries may be
+included in the function $g$ and their values may thus be monitored during
+continuation. Subsequent to detecting a zero-crossing of one or several of
+these real parts, the corresponding components of $g$ may be fixed, with a
+corresponding release of components of $\rho $ as described above.
+
+\section{Implementation}
+
+Communication between \textsc{coco} components during execution is
+accomplished through the passing and retrieval of a reference to the global 
+\texttt{opts} structure. Class members of this structure serve to identify
+properties that govern the execution of distinct \textsc{coco} components as
+well as to store intermediate computational results. The discussion below
+details the main elements of \textsc{coco} and the affected classes and
+class fields within the \texttt{opts} structure.
+
+\subsection{The \textsc{coco} constructor}
+
+The \textsc{coco} constructor serves to define a restriction $\left. \tilde{F%
+}\right| _{\mathcal{M}}$, a set of primary continuation parameters, and an
+associated event structure for continuation and event handling using the 
+\textsc{coco} continuer. Specifically, constructor functions enable the
+specification of the ``zero-problem'' algorithm, a set of monitor functions
+and associated events, and index vectors that determine the continuation
+status of the monitor functions. Here, events refer to the (possibly
+simultaneous) attainment of predefined numerical value(s) for a (collection
+of) monitor function(s). Properties of the \texttt{efunc} class store the
+relevant information.
+
+\subsubsection{The zero-algorithm and monitor functions}
+
+\begin{itemize}
+\item Information regarding the algorithm $f:\mathbb{R}^{n}\times \mathbb{R}%
+^{m}\rightarrow \mathbb{R}^{n}$ is provided to \textsc{coco} using the
+function \texttt{coco\_set\_func}. In particular, provided that $n\neq 0$, a
+reference to $f$ is assigned to \texttt{efunc.func} (which is otherwise
+empty). Moreover, the integer $m$ is assigned to \texttt{efunc.func\_dim}.
+
+\item Information regarding monitor functions and their default behavior
+during continuation is provided to \textsc{coco} using the function \texttt{%
+coco\_add\_func}. In particular, each call to \texttt{coco\_add\_func}%
+\textbf{\ }appends to \texttt{efunc.idx2par} an array of string labels that
+reference the components of a vector-valued monitor function and allocates
+the corresponding indices depending on the default behavior of the monitor
+function during continuation.
+
+\item A monitor function is labeled \emph{inactive} if it should be included
+in $g$ and if its default behavior is to remain constant during
+continuation. The corresponding indices are appended to \texttt{%
+efunc.inactive\_pars}. The value of \texttt{efunc.userA\_dim} (which is
+initialized to $0$) is reduced by the range dimension of the corresponding
+monitor function. Continuation is only possible as long as the total number
+of elements of \texttt{efunc.inactive\_pars} equals the integer $m$.
+
+\item A monitor function is labeled \emph{active} or \emph{internal }if it
+should be included in $g$ and if its default behavior is to vary during
+continuation and to be included in the \textsc{coco} continuer event
+monitoring. The corresponding indices are appended to \texttt{%
+efunc.active\_pars} or \texttt{efunc.internal\_pars}, respectively.
+
+\item A monitor function is labeled \emph{regular} or \emph{singular} if it
+should be omitted from $g$ and if its default behavior is to vary during
+continuation and to be included in the \textsc{coco} continuer event
+monitoring. Such monitor functions are regular provided that the
+linearizations of (\ref{eq: Continuation}) at associated events are full
+rank and singular, otherwise. The corresponding indices are appended to 
+\texttt{efunc.regular\_pars} or \texttt{efunc.special\_pars}, respectively. 
+
+\item A structure is appended to \texttt{efunc.userA} for each monitor
+function with inactive, active, or internal default behavior; to \texttt{%
+efunc.userB} for each monitor function with regular default behavior; and to 
+\texttt{efunc.userC} for each monitor function with singular default
+behavior. In each case, the structure's \texttt{idx} field contains a vector
+of the corresponding indices, the structure's \texttt{F} field contains a
+reference to the function, and the structure's \texttt{DFDX} field contains
+a reference to the linearization of the function, when available.
+\end{itemize}
+
+\subsubsection{Continuation}
+
+\begin{itemize}
+\item Information regarding the actual continuation status of individual
+components of monitor functions with inactive, active, or internal default
+behavior is provided to \textsc{coco} using the functions \texttt{%
+coco\_xchg\_pars} and \texttt{coco\_set\_dim}. In particular, each call to 
+\texttt{coco\_xchg\_pars} appends to \texttt{efunc.xchg} a pair of string
+labels corresponding to a transposition of the continuation status of the
+associated monitor functions.
+
+\item Each call to \texttt{coco\_set\_dim} assigns to \texttt{efunc.dim} the
+dimension $j$ of the solution manifold; to \texttt{efunc.cont\_pars} the
+labels of a subset of monitor functions; and to \texttt{efunc.cont\_par\_idx}
+the associated indices. In particular, the first $j$ elements of \texttt{%
+efunc.cont\_pars} must correspond to monitor functions with inactive
+continuation status. For each subsequent element of \texttt{efunc.cont\_pars}%
+, its continuation status is temporarily exchanged for that of a monitor
+function with internal continuation status, if such a function exists. The
+first $j$ elements of \texttt{efunc.cont\_par\_idx} and the indices of
+monitor functions with internal and active continuation status is
+subsequently assigned to \texttt{efunc.acp\_idx} and collectively refer to
+those monitor functions whose values will vary during the subsequent
+continuation. Finally, the first $j$ elements of \texttt{efunc.cont\_par\_idx%
+}, the indices of monitor functions with internal continuation status and
+the remaining elements of \texttt{efunc.cont\_par\_idx} is subsequently
+assigned to \texttt{efunc.op\_idx} and collectively refer to those monitor
+functions whose values will be included in the output during the subsequent
+continuation.
+
+\item The values of $\tilde{\eta}^{\ast }$ are by default computed from the
+initial values of $\xi $ and $\rho $ as per $\tilde{\eta}^{\ast }=\tilde{g}%
+\left( \xi ,\rho \right) $. These values may be overwritten using the
+function \texttt{coco\_set\_parival}. In particular, each call to \texttt{%
+coco\_set\_parival} modifies the cell array contained in \texttt{%
+efunc.parivals} to include string labels representing the corresponding
+monitor functions and the desired numerical values.
+\end{itemize}
+
+\subsubsection{Events}
+
+\begin{itemize}
+\item Information regarding events associated with monitor functions is
+provided to \textsc{coco} using the functions \texttt{coco\_add\_event} and 
+\texttt{coco\_set\_dim}. In particular, each call to \texttt{coco\_add\_event%
+} appends to \texttt{efunc.events} an event structure that includes a cell
+array containing a string identifying the event (in the \texttt{name}
+field), a cell array containing an event function handle (in the \texttt{han}
+field), a cell array containing string labels for the corresponding monitor
+functions (in the \texttt{par} field), an array of numerical trigger values
+(in the \texttt{vals} field), an event type (in the \texttt{evlist} field),
+and an event signature (in the \texttt{sign} field).
+
+\item An event is labeled a \emph{boundary event} and the string \texttt{%
+'BP\_idx'} is assigned to the \texttt{evlist} field if the corresponding
+point on the solution manifold lies on the boundary of the computational
+domain; is labeled a \emph{terminal event} and the string \texttt{'MX\_idx'}
+is assigned to the \texttt{evlist} field if the continuation process should
+terminate when the event is triggered; and is otherwise labeled a \emph{%
+special event} and the string \texttt{'SP\_idx'} is assigned to the \texttt{%
+evlist} field. In the case of terminal events, the \texttt{vals} field
+contains exactly one numerical trigger value.
+
+\item \emph{Simple} event signatures trigger when a single scalar-valued
+monitor function crosses a predefined numerical value and can be associated
+with all three types of events. In the default case, the character \texttt{%
+'='} is assigned to the \texttt{sign} field. For boundary events with a
+single numerical trigger value and for terminal events, the characters 
+\texttt{'\TEXTsymbol{<}'} or \texttt{'\TEXTsymbol{>}'} may alternatively be
+assigned to the \texttt{sign} field. The latter choices force the \textsc{%
+coco} continuer to check that the initial point lies within the
+computational domain.
+
+\item \emph{Grouped} event signatures trigger when at least one of several
+scalar-valued monitor functions crosses a predefined numerical value and can
+be associated with boundary or special events. In this case, a string of 
+\texttt{'='}'s equal in length to the number of elements in the \texttt{par}
+and \texttt{vals} fields, respectively, is assigned to the \texttt{sign}
+field.
+
+\item Each call to \texttt{coco\_set\_dim} reallocates the information
+contained within \texttt{efunc.events} to the structure \texttt{efunc.ev} so
+as to include only events in those monitor functions whose indices are
+contained in \texttt{efunc.acp\_idx}, \texttt{efunc.regular\_pars}, or 
+\texttt{efunc.special\_pars}. In particular, the \texttt{efunc.ev} structure
+represents a repacking of the relevant content of \texttt{efunc.events} 
+\textbf{across} events rather than within events with the inclusion of
+linking information for grouped events signatures.
+
+\item Following execution of \texttt{coco\_set\_dim}, the \texttt{pidx}
+field contains an array of indices of the corresponding monitor functions;
+the \texttt{vals} field contains an array of the corresponding numerical
+trigger values; the \texttt{par\_type} field contains a cell array of
+strings identifying the algorithm used to locate the corresponding events (%
+\texttt{'continuation'} in the case of events in $\eta $, \texttt{'regular'}
+in the case of events in regular monitor functions, and \texttt{'singular'}
+in the case of events in singular monitor functions); the \texttt{point\_type%
+} field contains a cell array of strings identifying the corresponding
+events; the \texttt{evhan} field contains a cell array of event function
+handles; the \texttt{evsign} field contains a string of \texttt{'='}'s, 
+\texttt{'\TEXTsymbol{<}'}'s, and \texttt{'\TEXTsymbol{>}'}'s associated with
+the corresponding events; the \texttt{BP\_idx} field contains an array of
+indices of monitor functions involved in boundary events; the \texttt{MX\_idx%
+} field contains an array of indices of monitor functions involved in
+terminal events; the \texttt{SP\_idx} field contains an array of indices of
+monitor functions involved in special events; and the \texttt{evgroup} field
+contains a cell array of integer arrays linking elements of the \texttt{pidx}%
+, \texttt{vals}, \texttt{par\_type}, \texttt{point\_type}, \texttt{evhan},
+and \texttt{evsign} fields associated with grouped event signatures.
+\end{itemize}
+
+\subsection{\textsc{coco} event handlers}
+
+For each grouped event signature, the \textsc{coco} continuer requires a
+user-provided external event handler that determines the action to be taken
+when the corresponding event is triggered. Using a reverse communication
+protocol, the event handler is called multiple times by the \textsc{coco}
+continuer until it indicates that all possible events in this group have
+been processed.
+
+\begin{itemize}
+\item A \textsc{coco} event handler must accept three arguments, namely the
+global \texttt{opts} structure, a command string, and a data structure. A 
+\textsc{coco} event handler must return two arguments, namely a message
+structure whose \texttt{action} field determines the subsequent action of
+the \textsc{coco} continuer and a modified version of the original data
+structure that includes the content of the message structure in the \texttt{%
+msg} field. Upon subsequent calls to the event handler, the most recent
+content of the message structure is thus available to determine the
+subsequent action of the \textsc{coco} continuer.
+
+\item The command string argument corresponds to the state of processing of
+the grouped event signature and equals \texttt{'init'} or \texttt{'check'}.
+Specifically, when the command string argument equals \texttt{'init'}, the
+allowable values for the outgoing message structure's \texttt{action} field
+are \texttt{'locate'} and \texttt{'finish'}. Similarly, when the command
+string argument equals \texttt{'check'}, the allowable values for the
+message structure's \texttt{action} field are \texttt{'add'} and \texttt{%
+'reject'}.
+
+\item In the cases that the message structure's \texttt{action} field equals 
+\texttt{'locate'}, the message structure's \texttt{idx} field contains an
+integer array consisting of the indices of the monitor functions involved in
+the corresponding event and the message structure's \texttt{point\_type}
+field contains a string identifying the corresponding event.
+
+\item In a typical implementation, a call to the event handler with the
+command string \texttt{'init'} and an empty \texttt{msg} field in the data
+structure results in the creation of an additional field of the data
+structure containing an array of possible events, ordered by priority, that
+may have triggered the \textsc{coco} event detection.
+\end{itemize}
+
+\subsection{The \textsc{coco} corrector}
+
+The \textsc{coco} corrector implements a single complete step of a line
+search method for finding a root of some function $F:\mathbb{R}%
+^{n}\rightarrow \mathbb{R}^{n}$. In a default implementation, the \textsc{%
+coco} corrector implements a single step of the damped Newton method.
+Properties of the corresponding class \texttt{nwtn} control the behavior of
+the corrector and store intermediate computational results.
+
+\begin{itemize}
+\item The \texttt{nwtn.d} property stores the current nominal correction $%
+d\in \mathbb{R}^{n}$ to the current approximation $x\in \mathbb{R}^{n}$
+(stored in \texttt{nwtn.x}) of the unique root of $F$ in some neighborhood
+of the initial solution guess $x_{0}\in \mathbb{R}^{n}$ (stored in \texttt{%
+nwtn.x0}).
+
+\item The \texttt{nwtn.func} property stores a reference to the \texttt{%
+opts.(nwtn.func)} class of the global \texttt{opts} structure. The \texttt{%
+opts.(nwtn.func).F}, \texttt{opts.(nwtn.func).DFDX}, and \texttt{%
+opts.(nwtn.func).linsolve} properties store handles to external methods used
+to complete a step of the corrector.
+
+\item The method associated with \texttt{opts.(nwtn.func).F} must accept $x$
+as argument and return the \emph{residual} $F\left( x\right) $ (stored in 
+\texttt{opts.nwtn.f}).
+
+\item The method associated with \texttt{opts.(nwtn.func).DFDX} must accept $%
+x$ as argument and return a suitably defined reference (stored in \texttt{%
+opts.nwtn.J}). In a default implementation, \texttt{opts.(nwtn.func).DFDX}
+returns the linearization $\partial F\left( x\right) $.
+
+\item The content of \texttt{opts.nwtn.J} is updated provided that the
+number of completed corrector steps $i$ (stored in \texttt{nwtn.It}) does
+not exceed a maximum value (stored in \texttt{nwtn.ItNW}) if such a value is
+set.
+
+\item The method associated with \texttt{opts.(nwtn.func).linsolve} must
+accept the outputs of \texttt{opts.(nwtn.func).F} and \texttt{%
+opts.(nwtn.func).DFDX} as first and second argument, respectively, and
+return $d$. In a default implementation, \texttt{opts.(nwtn.func).linsolve}
+employs \textsc{Matlab}'s \texttt{mldivide} operator to solve the linear
+equation $\partial F\left( x\right) \cdot d=F\left( x\right) $.
+
+\item Each complete corrector step seeks to yield an improved solution
+approximation $x-\gamma d$, where $\gamma $ is a \emph{damping factor}
+(stored in \texttt{nwtn.ga}) bounded above by the minimum of the initial
+damping factor (stored in \texttt{nwtn.ga0}) and an $x$- and $d$-dependent
+maximum given by the ratio $\mathtt{nwtn.MaxStep}\ast \left( 1+\left\|
+x\right\| \right) /\left\| d\right\| $, where $\left\| \cdot \right\| $
+denotes the standard Euclidean norm.
+
+\item In particular, $\gamma $ is reduced iteratively by a scaling factor
+(stored in \texttt{nwtn.al}) as long as the number of iterations $j$ (stored
+in \texttt{nwtn.SubIt}) does not exceed a maximum value (stored in \texttt{%
+nwtn.SubItMX}) and as long as $\left\| F\left( x-\gamma d\right) \right\| $
+is greater than $\left\| F\left( x\right) \right\| $ (stored in \texttt{%
+nwtn.norm\_f\_old}).
+
+\item The current solution guess $x$ is characterized as an acceptable
+converged solution provided that $\left\| d\right\| $ falls below a preset
+tolerance (stored in \texttt{nwtn.TOL}), in which case the value $1$ is
+stored in the \texttt{nwtn.accept} property (which is initialized to $0$).
+
+\item Convergence fails if the number of completed corrector steps exceeds a
+preset maximum value (stored in \texttt{nwtn.ItMX}). In this case, the 
+\textsc{coco} corrector throws an error with identifier \texttt{%
+NWTN:NoConvergence}.
+
+\item Provided that the value of the \texttt{nwtn.LogLevel} property exceeds 
+$0$, default screen logging of intermediate data includes the current values
+of $i$, $j$, $\gamma $, $\left\| d\right\| $, $\left\| F\left( x\right)
+\right\| $, $\left\| x\right\| $, and computation times associated with the
+residual (stored in \texttt{nwtn.ftm}), the linearization (stored in \texttt{%
+nwtn.dftm}) and the correction (stored in \texttt{nwtn.stm}).
+
+\item The \texttt{nwtn.begin\_callback}, \texttt{nwtn.begin\_step\_callback}%
+, \texttt{nwtn.end\_step\_callback}, and \texttt{nwtn.end\_callback}
+properties store handles to methods that enable extraction and modification
+of existing or user-defined properties of the \texttt{opts} class at the
+outset of the first call to the corrector, at the outset of each call to the
+corrector, at the conclusion of each call to the corrector, and subsequent
+to the call to the corrector that results in a converged solution. In a
+default implementation, these methods are given by the empty action.
+
+\item The \texttt{nwtn.print\_headline} and \texttt{nwtn.print\_data}
+properties store handles to methods that enable screen logging of additional
+user-defined output data. In a default implementation, these methods are
+given by the empty action.
+\end{itemize}
+
+\noindent Tables \ref{table: Newton1}-\ref{table: Newton3} summarize the
+properties of the \texttt{nwtn} class and include default values, whenever
+appropriate.
+
+\begin{table}[h]
+\caption{Properties that influence the corrector behavior.}
+\label{table: Newton1}\centering%
+\begin{tabular}{|lll|}
+\hline
+Property & Default value & Explanation \\ \hline
+\texttt{ItMX} & $10$ & : max. number of Newton iterations \\ 
+\texttt{ItNW} & \texttt{ItMX} & : max. number of linearization updates \\ 
+\texttt{SubItMX} & $8$ & : max. number of damping iterations \\ 
+\texttt{TOL} & $1.0e-8$ & : convergence criterion \\ 
+\texttt{LogLevel} & $1$ & : level of diagnostic output \\ 
+\texttt{MaxStep} & $0.1$ & : max. size of Newton step \\ 
+\texttt{ga0} & $1.0$ & : initial damping factor \\ 
+\texttt{al} & $0.5$ & : scale factor \\ \hline
+\end{tabular}%
+\end{table}
+
+\begin{table}[h]
+\caption{Properties that define function callback handlers.}
+\label{table: Newton2}\centering%
+\begin{tabular}{|ll|}
+\hline
+Property & Default value \\ \hline
+\texttt{print\_headline} & \texttt{@coco\_default\_print} \\ 
+\texttt{print\_data} & \texttt{@coco\_default\_print} \\ 
+\texttt{begin\_callback} & \texttt{@coco\_default\_callback} \\ 
+\texttt{begin\_step\_callback} & \texttt{@coco\_default\_callback} \\ 
+\texttt{end\_callback} & \texttt{@coco\_default\_callback} \\ 
+\texttt{end\_step\_callback} & \texttt{@coco\_default\_callback} \\ \hline
+\end{tabular}%
+\end{table}
+
+\begin{table}[h]
+\caption{Properties that store internal data and their default
+interpretation.}
+\label{table: Newton3}\centering%
+\begin{tabular}{|ll|}
+\hline
+Property & Explanation \\ \hline
+\texttt{It} & : number of completed Newton iterations \\ 
+\texttt{accept} & : flag if iteration converged \\ 
+\texttt{ftm} & : total time spent evaluating residuals \\ 
+\texttt{dftm} & : total time spent on evaluating linearizations \\ 
+\texttt{stm} & : total time spent on evaluating corrections \\ 
+\texttt{SubIt} & : number of completed damping steps \\ 
+\texttt{x0} & : initial solution guess \\ 
+\texttt{x} & : current solution \\ 
+\texttt{f} & : current residual \\ 
+\texttt{norm\_f\_old} & : norm of previously computed residual \\ 
+\texttt{J} & : current linearization \\ 
+\texttt{d} & : current correction \\ 
+\texttt{ga} & : current damping factor \\ \hline
+\end{tabular}%
+\end{table}
+
+Great flexibility is afforded the user to introduce non-default
+functionality to the \textsc{coco} corrector. Consider, for example, the
+following implementation of Broyden's method.%
+\[
+B_{i}\cdot d_{i}=F\left( x_{i}\right) \Rightarrow x_{i+1}=x_{i}-\gamma
+d_{i}\Rightarrow B_{i+1}=B_{i}-\frac{\left( F\left( x_{i+1}\right) -F\left(
+x_{i}\right) +\gamma B_{i}\cdot d_{i}\right) \cdot d_{i}^{T}}{\gamma \left\|
+d_{i}\right\| ^{2}} 
+\]%
+with initial value $B_{0}$ equal to the identity matrix (Ref: NUMERICAL\
+RECIPES). To this end, consider the following modifications.
+
+\begin{itemize}
+\item Add the \texttt{opts.Broyden.f\_old} and \texttt{opts.Broyden.B}
+properties.
+
+\item Let the method associated with \texttt{nwtn.begin\_callback} assign
+the identity matrix to \texttt{opts.Broyden.B}.
+
+\item Let the method associated with \texttt{nwtn.begin\_step\_callback}
+assign the value of \texttt{nwtn.f} to \texttt{opts.Broyden.f\_old}.
+
+\item Let the method associated with \texttt{opts.(nwtn.func).DFDX} return
+the current value of \texttt{opts.Broyden.B}.
+
+\item Let the method associated with \texttt{nwtn.end\_step\_callback}
+update the value of \texttt{opts.Broyden.B}.
+\end{itemize}
+
+\subsection{Manifold continuation}
+
+\textsc{coco} is compatible with a general-purpose manifold-covering
+algorithm but provides an explicit implementation only for the special case
+of a one-dimensional solution manifold. A manifold cover is here taken to
+consist of a consistent network $\mathcal{N}$ of linearized charts $\left(
+u,t\right) $, each of which is composed of a point $u=\left( 
+\begin{array}{ccc}
+\xi & \rho & \eta%
+\end{array}%
+\right) $ on the manifold and a basis of the corresponding tangent space $t$%
+. Specifically, the collection of nodes of the network constitutes a
+manifold atlas, whereas the network connectivity distinguishes between
+internal, external, and boundary charts and ensures that further
+continuation is not performed into already computed regions of the atlas.
+Consistency is imposed through conditions on the network connectivity that
+respect a natural manifold meshing with reasonable numerical bounds on
+curvature.
+
+Given an initial manifold cover, \textsc{coco} proceeds to select an
+external chart $\left( u,t\right) $ and to formulate a \emph{predictor} $v$,
+such that $v-u$ lies in the tangent space $t$. In particular, the predictor
+is chosen so as to ensure that there exists a consistent network $\mathcal{N}%
+^{\prime }\supset \mathcal{N}$ that contains $\left( v,t\right) $. Using $v$
+as initial guess, the application of an iterative root-solver to the \emph{%
+corrector} (cf. \ref{eq: Continuation}) then yields a new point $u^{\prime }$
+on the solution manifold.
+
+\textsc{coco} accepts this point provided that there exists a consistent
+network $\mathcal{N}^{\prime }\supset \mathcal{N}$ that contains the
+corresponding chart $\left( u^{\prime },t^{\prime }\right) $ and that this
+point is within the computational domain. In this case, the network $%
+\mathcal{N}$ is replaced by $\mathcal{N}^{\prime }$. On the other hand, if
+either condition fails, the point $u^{\prime }$ is rejected and the step is
+repeated with a refined predictor. In particular, in the case that $%
+u^{\prime }$ lies outside the computational domain, an attempt is made to
+locate a co-dimension-one boundary crossing by replacing one of the
+components of $h$ in (\ref{eq: Continuation}) with a suitable boundary
+condition.
+
+After each successful predictor-corrector step, \textsc{coco} checks the
+components of $\eta $ for co-dimension-one crossings of predefined numerical
+values along newly formed one-dimensional edges of the covering network.
+Such \emph{special points} are subsequently located on the solution manifold
+by replacing one of the components of $h$ in (\ref{eq: Continuation}) with
+the condition $\eta _{i}=\eta _{i}^{\ast }$ for some $i$.
+
+In addition, \textsc{coco} also checks the components of an additional set
+of not-twice differentiable monitoring functions for co-dimension-one
+crossings of predefined numerical values along newly formed one-dimensional
+edges of the covering network. In this instance, special points are
+subsequently located with a solver that combines bisection and root-solver
+iterations to an extent determined by the degree of regularity of the
+special point.
+
+A special point is regular if there exists a rank-$j$ matrix $V$, such that $%
+V^{T}\cdot \left( u^{\prime }-u\right) \neq 0$ and such that the
+linearization at the special point of the corrector (\ref{eq: Continuation})
+with $h$ as in (\ref{eq: hlinear}) is non-singular. In this case, let $%
+\lambda =kV^{T}\cdot \left( u^{\prime }-u\right) $ for $k\in \left(
+0,1\right) $ and perform bisection on $k$ combined with the application of
+an iterative root solver to the corrector (\ref{eq: Continuation}) to locate
+the special point. Co-dimension-one crossings of predefined values of the
+maximum of a set of functions of $\xi $ and $\rho $ are examples of regular
+points.
+
+In the singular case, let $u_{k}=\left( 1-k\right) u+ku^{\prime }$ with $%
+k\in \left( 0,1\right) $ and perform bisection on $k$ to locate a point on
+the straight-line segment between $u$ and $u^{\prime }$ at which the
+corresponding monitor function vanishes. This point may serve as an initial
+guess for a further extended function $F$ for which the special point is
+regular. Classical examples of the singular case are pitchfork and
+transcritical bifurcation points. In particular, \textsc{coco} treats events
+associated with simultaneous crossings of predefined numerical values of
+multiple scalar-valued monitor functions as singular.
+
+\subsection{The \textsc{coco} continuer}
+
+The \textsc{coco} continuer implements a one-parameter covering algorithm
+for the solution manifold associated with the equation $\left. \tilde{F}%
+\right| _{\mathcal{M}}\left( u\right) =0$, where $\left. \tilde{F}\right| _{%
+\mathcal{M}}:\mathbb{R}^{n+m+k+1}\rightarrow \mathbb{R}^{n+m+k}$. Properties
+of the class \texttt{cont} control the behavior of the covering algorithm
+and store intermediate computational results. Properties of the class 
+\texttt{state} control the behavior of the associated finite-state machine.
+
+\subsubsection{Manifold atlas}
+
+\begin{itemize}
+\item The \texttt{cont.charts} property contains a stack of active charts.
+
+\item The \texttt{x} property of each chart contains the corresponding value
+of $u=\left( \xi ,\rho ,\eta \right) $. The \texttt{t} property contains a
+corresponding tangent vector to the solution manifold. The \texttt{p}
+property contains the corresponding values of all defined monitoring
+functions. The \texttt{init} property is nonzero in the case of an initial,
+unprocessed, chart and zero otherwise. If not empty, the \texttt{pt\_type}
+contains the label \texttt{'EP'} in the case of a chart on the boundary of
+the domain of continuation, the label \texttt{'MX'} in the case of a chart
+at which continuation must terminate (e.g., beyond which continuation was
+not possible), or a user-defined label in the case of a chart associated
+with a user-defined event. The \texttt{ep\_flag} property is empty by
+default; equals $1$ in the case of a boundary chart; and equals $2$ in the
+case of a terminal chart.
+\end{itemize}
+
+\subsubsection{Finite-state machine}
+
+\begin{itemize}
+\item The \textsc{coco} continuer exits the finite-state machine when the
+value $1$ is stored in the \texttt{cont.accept} property (which is
+initialized to $0$).
+
+\item The \texttt{cont.state} property contains the current state of the
+finite-state machine and equals \texttt{init}, \texttt{init\_chart\_list}, 
+\texttt{predict}, \texttt{correct}, \texttt{check\_solution}, \texttt{%
+refine\_step}, \texttt{locate\_boundary\_events}, \texttt{%
+check\_terminate\_events}, \texttt{locate\_special\_events}, \texttt{%
+locate\_events}, \texttt{locate\_multi}, \texttt{locate\_cont}, \texttt{%
+locate\_reg}, \texttt{locate\_sing}, \texttt{locate\_BP\_warning}, \texttt{%
+locate\_MX\_warning}, \texttt{locate\_SP\_warning}, \texttt{add\_BP}, 
+\texttt{add\_MX}, \texttt{add\_SP}, \texttt{insert\_points}, or \texttt{%
+update}. Each value \texttt{\%\%\%} of the \texttt{cont.state} property is
+associated with three properties \texttt{state.\%\%\%}, \texttt{%
+state.bcb\_\%\%\%}, and \texttt{state.ecb\_\%\%\%} of the \texttt{state}
+class. The first of these contains a handle to a predefined method
+associated with the corresponding state. The latter two contain handles to a
+pair of user-defined callback functions that enable extraction and
+modification of existing or user-defined properties of the \texttt{opts}
+class before and after, respectively, each call to the corresponding
+predefined method. The diagram in FIG\ XXX represents the flow through the
+finite-state machine.
+
+\item The \texttt{cont.next\_state} property contains the state of the
+finite-state machine subsequent to a call to the method associated with the 
+\texttt{correct} state at which convergence is achieved. The \texttt{%
+cont.err\_state} property contains the state of the finite-state machine
+subsequent to a call to the method associated with the \texttt{correct}
+state at which the \texttt{NWTN:NoConvergence} error is thrown. In
+particular, if \texttt{cont.err\_state} is empty, execution terminates with
+the \texttt{NWTN:NoConvergence} error.
+
+\item The \texttt{cont.locate\_next\_state}, \texttt{cont.locate\_warn\_state%
+}, and \texttt{cont.locate\_add\_state} properties contains the XXXX state
+of the finite-state machine subsequent to a call to the method associated
+with the \texttt{correct} state at which convergence is achieved. XXXX
+\end{itemize}
+
+\subsubsection{Initialization}
+
+\begin{itemize}
+\item The method associated with the \texttt{init} state assigns the initial
+guess $u_{0}$ (contained in \texttt{cont.u0}) to \texttt{nwtn.x0} and sets
+the \texttt{nwtn.func} property to refer to the \texttt{xfunc} class. The 
+\texttt{xfunc.fixpar\_idx}, \texttt{xfunc.fixpar\_val}, and \texttt{%
+xfunc.mode} properties are set to the index corresponding to the primary
+continuation parameter $\hat{\eta}$, the numerical value $\hat{\eta}^{\ast }$%
+, and $1$, respectively, so as to reflect the choice $h\left( u\right) =\hat{%
+\eta}-\hat{\eta}^{\ast }$ in (\ref{eq: Continuation}). The \texttt{cont.state%
+}, \texttt{cont.next\_state}, and \texttt{cont.err\_state} properties are
+subsequently set to \texttt{correct}, \texttt{init\_chart\_list}, and the
+empty array, respectively.
+
+\item The method associated with the \texttt{correct} state calls the 
+\textsc{coco} corrector repeatedly until the \texttt{NWTN:NoConvergence}
+error is thrown or until convergence is achieved.
+
+\item The method associated with the \texttt{init\_chart\_list} state
+initiates the chart stack and subsequently sets the \texttt{cont.state}
+property to \texttt{predict}. In particular, the chart stack contains one
+chart with \texttt{pt\_type} equal to \texttt{EP} and associated with the
+converged point $u$ (assigned to \texttt{cont.u0}) and a tangent direction
+corresponding to initially increasing values of $\hat{\eta}$ provided that
+the correponding maximum number of continuation steps (stored in the first
+element of the \texttt{cont.ItMX} array) is positive; one chart with \texttt{%
+pt\_type} equal to \texttt{EP} and associated with the converged point $u$
+and a tangent direction corresponding to initially decreasing values of $%
+\hat{\eta}$ provided that the correponding maximum number of continuation
+steps (stored in the second element of the \texttt{cont.ItMX} array) is
+positive; both charts provided that both entries of the \texttt{cont.ItMX}
+array are positive; or is an empty cell array if neither entry of the 
+\texttt{cont.ItMX} array is positive;
+
+\item If at least one of the entries of the \texttt{cont.ItMX} array is
+positive, the method associated with the \texttt{init\_chart\_list} state
+throws an error if two or more inequalities associated with relevant
+boundary events are violated or if one such inequality is violated and the
+value of the corresponding monitor function deviates from the trigger value
+by more than a given tolerance ($10$ times the value stored in \texttt{%
+opts.nwtn.TOL}). Here, an inequality associated with a boundary event is
+satisfied provided that the corresponding monitor function is greater than
+the trigger value in the case that the \texttt{sign} field is \texttt{%
+\TEXTsymbol{<}} and less than the trigger value in the case that the \texttt{%
+sign} field is \texttt{\TEXTsymbol{>}}. Boundary events are relevant
+provided that the corresponding event handler, when defined, does not return
+the \texttt{reject} message when called with the \texttt{check} flag and
+data corresponding to the converged point $u$.
+
+\item If, instead, at least one of the entries of the \texttt{cont.ItMX}
+array is positive, one inequality associated with a relevant boundary event
+is violated, the value of the corresponding monitor function deviates from
+the trigger value by less than the given tolerance, the corresponding 
+\texttt{par\_type} is \texttt{continuation} or \texttt{regular}, and a
+finite-difference estimate of the derivative of the monitor function along
+the tangent direction deviates from zero by more than the given tolerance,
+the method associated with the \texttt{init\_chart\_list} state modifies the
+user-defined content of the \texttt{cont.ItMX} array prior to chart-stack
+initiation. In particular, if the corresponding \texttt{sign} field is 
+\texttt{\TEXTsymbol{>}} (\texttt{\TEXTsymbol{<}}), the first (second) entry
+of the \texttt{cont.ItMX} array is set to zero. In this case, the \texttt{%
+chart.ignore\_at} field is set equal to the index of the corresponding
+monitor function.
+\end{itemize}
+
+\subsubsection{Prediction and correction}
+
+\begin{itemize}
+\item Given an empty chart stack, the method associated with the \texttt{%
+predict} state sets \texttt{cont.accept} to $1$ and terminates.
+
+\item Given a non-empty chart stack, the method associated with the \texttt{%
+predict} state sets the \texttt{xfunc.u0}, \texttt{xfunc.t}, and \texttt{%
+xfunc.mode} properties to $u^{\ast }=$\texttt{chart.x}, $t=$\texttt{chart.t}%
+, and $1$, respectively, so as to reflect the choice $h\left( u\right)
+=t^{T}\cdot \left( u-u^{\ast }\right) +\lambda \left\| t\right\| ^{2}$ in (%
+\ref{eq: Continuation}) and constructs a predictor $u$ (assigned to \texttt{%
+nwtn.x0}) separated from the point $u^{\ast }$ by a multiple $\lambda $
+(stored in \texttt{xfunc.h}) of $t$. The value of $\lambda $ is reduced
+iteratively from its current value (initialized at \texttt{cont.h0} for an
+initial, unprocessed, chart) by a scaling factor $\phi _{\min }$ (stored in 
+\texttt{cont.h\_fac\_min}) as long as the norm of the residual (evaluated by
+the method associated with the \texttt{opts.xfunc.F} property) exceeds an
+upper bound (stored in \texttt{cont.MaxRes}) and $\lambda $ exceeds a
+minimum value $\lambda _{\min }$ (stored in \texttt{cont.h\_min}) and is set
+to equal this minimum value if scaling results in a number smaller than the
+minimum. For an initial, unprocessed chart, \texttt{cont.ptlist} is
+initialized to a cell array containing the chart and \texttt{cont.current\_pt%
+} it set to $1$. The \texttt{cont.state}, \texttt{cont.next\_state}, and 
+\texttt{cont.err\_state} properties are subsequently set to \texttt{correct}
+(see above), \texttt{check\_solution}, and \texttt{refine\_step},
+respectively.
+
+\item The method associated with the \texttt{refine\_step} state assigns $%
+\max \left( \lambda _{\min },\phi _{\min }\lambda \right) $ to $\lambda $
+and sets the \texttt{cont.state} property to \texttt{predict} unless $%
+\lambda \leq \lambda _{\min }$, in which case the \texttt{cont.state}
+property is set equal to \texttt{add\_MX}.
+
+\item If the angle between the tangent vector associated with a converged
+point $u$ and the tangent vector associated with the current chart exceeds
+an upper bound (equal to the product of the values stored in \texttt{%
+cont.h\_fac\_max} and \texttt{cont.arc\_alpha}) and $\lambda >\lambda _{\min
+}$, the method associated with the \texttt{check\_solution} state assigns $%
+\max \left( \lambda _{\min },\phi _{\min }\lambda \right) $ to $\lambda $
+and sets the \texttt{cont.state} property to \texttt{predict}.
+
+\item If either condition is violated, the method associated with the 
+\texttt{check\_solution} state appends the current chart, with \texttt{%
+pt\_type} equal to \texttt{EP} and \texttt{ep\_flag} equal to $1$ in the
+case that the number of completed iterations (stored in \texttt{cont.It})
+exceeds the corresponding entry of \texttt{cont.ItMX} and with empty \texttt{%
+pt\_type} and \texttt{ep\_flag} equal to $0$ otherwise, to the cell array
+contained in \texttt{cont.ptlist} and sets \texttt{cont.current\_pt} to $2$.
+Moreover, the \texttt{cont.events} structure is initialized so that the 
+\texttt{u0}, \texttt{u1}, \texttt{us0}, and \texttt{us1} fields contain the
+points and tangent vectors, respectively, for the two charts contained in 
+\texttt{cont.ptlist}; the \texttt{us} field contains a unit vector parallel
+to and directed along the average of the two tangent vectors; and the 
+\texttt{dh} field contains the projected distance between the two points
+along the direction spanned by \texttt{us}. The content of the \texttt{u0}
+and \texttt{us} fields is also stored in the \texttt{xfunc.u0} and \texttt{%
+xfunc.t}\textbf{\ }properties. The \texttt{cont.state} property is
+subsequently set to \texttt{locate\_boundary\_events}.
+\end{itemize}
+
+\subsubsection{Event handling}
+
+\begin{itemize}
+\item The method associated with the \texttt{locate\_boundary\_events} state
+appends the \texttt{cont.events} structure; sets the \texttt{%
+locate\_next\_state}, \texttt{locate\_warn\_state}, and \texttt{%
+locate\_add\_state} properties to \texttt{check\_terminate\_events}, \texttt{%
+locate\_BP\_warning}, and \texttt{add\_BP}, respectively; and sets the 
+\texttt{cont.state} property to \texttt{check\_terminate\_events} if \texttt{%
+cont.events.evlist} is empty and to \texttt{locate\_events}, otherwise. In
+particular, the \texttt{cont.events.ev1} and \texttt{cont.events.ev2} fields
+are assigned arrays $e_{1}$ and $e_{2}$ consisting of the values of all
+defined monitor functions at the \texttt{u0} and \texttt{u1} points.
+Moreover, the \texttt{cont.events.evlist} field contains those indices
+contained in the \texttt{efunc.ev.BP\_idx} array but not in the \texttt{%
+ignore\_at} field of the first or second charts in \texttt{cont.ptlist}; for
+which $e_{1i}\neq 0$ and $\left| e_{i1}-e_{i2}\right| $ exceeds a given
+tolerance ($10$ times the value stored in \texttt{opts.nwtn.TOL}); and for
+which $e_{1i}e_{2i}\leq 0$ in the case of initially increasing values of $%
+\hat{\eta}$ and $e_{1i}e_{2i}<0$ in the case of initially decreasing values
+of $\hat{\eta}$.
+
+\item The method associated with the \texttt{check\_terminate\_events} state
+truncates the \texttt{cont.ptlist} array to its first two elements, appends
+the \texttt{cont.events} structure; and sets the \texttt{cont.state}
+property to \texttt{locate\_special\_events} if \texttt{cont.events.evlist}
+is empty and to \texttt{add\_MX}, otherwise. In particular, the \texttt{%
+cont.events.ev1} and \texttt{cont.events.ev2} fields are assigned arrays $%
+e_{1}$ and $e_{2}$ of the values of all defined monitor functions at the
+points given by the content of the \texttt{u0} and \texttt{u1} fields, which
+in turn are assigned to equal the \texttt{x} fields of the first and second
+charts in \texttt{cont.ptlist}, respectively. Moreover, the \texttt{%
+cont.events.evlist} field contains those indices contained in the \texttt{%
+efunc.ev.MX\_idx} array, for which $e_{1i}\neq 0$ and $\left|
+e_{i1}-e_{i2}\right| $ exceeds a given tolerance ($10$ times the value
+stored in \texttt{opts.nwtn.TOL}); and for which $e_{1i}e_{2i}\leq 0$ in the
+case of initially increasing values of $\hat{\eta}$ and $e_{1i}e_{2i}<0$ in
+the case of initially decreasing values of $\hat{\eta}$.
+
+\item The method associated with the \texttt{locate\_special\_events} state
+appends the \texttt{cont.events} structure; sets the \texttt{%
+locate\_next\_state}, \texttt{locate\_warn\_state}, and \texttt{%
+locate\_add\_state} properties to \texttt{insert\_points}, \texttt{%
+locate\_SP\_warning}, and \texttt{add\_SP}, respectively; and sets the 
+\texttt{cont.state} property to \texttt{insert\_points} if \texttt{%
+cont.events.evlist} is empty and to \texttt{locate\_events}, otherwise. In
+particular, the \texttt{cont.events.ev1} and \texttt{cont.events.ev2} fields
+are assigned arrays $e_{1}$ and $e_{2}$ of the values of all defined monitor
+functions at the points given by the \texttt{u0} and \texttt{u1} points.
+Moreover, the \texttt{cont.events.evlist} field contains those indices
+contained in the \texttt{efunc.ev.SP\_idx} array, for which $e_{1i}\neq 0$
+and $\left| e_{i1}-e_{i2}\right| $ exceeds a given tolerance ($10$ times the
+value stored in \texttt{opts.nwtn.TOL}); and for which $e_{1i}e_{2i}\leq 0$
+in the case of initially increasing values of $\hat{\eta}$ and $%
+e_{1i}e_{2i}<0$ in the case of initially decreasing values of $\hat{\eta}$.
+
+\item If the \texttt{cont.events} structure is empty, the method associated
+with the \texttt{add\_MX} state stores the last obtained chart and a copy
+with \texttt{pt\_type} equal to \texttt{MX} and \texttt{ep\_flag} equal to $%
+2 $ in the \texttt{cont.ptlist} and sets the \texttt{cont.state} property to 
+\texttt{insert\_points}.
+
+\item After logging of the content of cont.ptlist, the method associated
+with the \texttt{insert\_points} state deletes all but the last chart
+contained in cont.ptlist, sets cont.current\_pt to $1$, and sets the \texttt{%
+cont.state} property to \texttt{update}.
+\end{itemize}
+
+\subsubsection{Updating}
+
+\begin{itemize}
+\item The method associated with the \texttt{update} state
+
+\item The \texttt{cont.efunc} and \texttt{cont.xfunc }properties store
+references to the \texttt{opts.(cont.efunc)} and \texttt{opts.(cont.xfunc)}
+classes of the global \texttt{opts} structure.
+
+\item The \texttt{opts.(cont.efunc).F}, \texttt{opts.(cont.efunc).DFDX}, and 
+\texttt{opts.(cont.efunc).linsolve} properties store function handles for
+computing the \emph{residual} $F\left( x,p\right) $ (stored in), a
+corresponding linearization $\left( 
+\begin{array}{cc}
+\partial _{x}F & \partial _{p}F%
+\end{array}%
+\right) $ (stored in), and for solving the linear equation $\partial
+_{x}F\cdot t_{x}+\tau \partial _{p_{1}}F+\partial _{p_{2\ldots n}}F\cdot
+t_{p}=0$, respectively, for some function $F:\mathbb{R}^{n}\times \mathbb{R}%
+^{m}\rightarrow \mathbb{R}^{n+m-1}$.
+
+\item Here, $x$ and $p$ are the components of a vector stored in \texttt{%
+cont.u} containing the current solution guess for a point on the root
+manifold in the vicinity of the initial point (stored in \texttt{cont.u0}).
+In particular, \texttt{cont.xidx} and \texttt{cont.pidx} store the index
+references to the corresponding positions in \texttt{cont.u}.
+\end{itemize}
+
+\section{Toolbox development}
+
+\section{Appendix}
+\begin{verbatim}
+opts = [];
+opts = coco_add_func(opts, @plane, 'internal', 'H');
+opts = coco_add_event(opts, 'UZ', 'H',  0);
+opts = coco_set(opts, 'defaults', 'CleanData', 1);
+bd1 = coco(opts, 'alcont', @cone, 'x', 'isol', 'sol', ...
+\qquad \qquad \qquad \qquad \lbrack 0.4], [0;0.5;0], 'PAR(2)', [0.1, 2]);
+ 
+z = [bd1{2:end,10}];
+p = [bd1{2:end,11}];
+x = p(1,:);
+y = p(2,:);
+plot3(x, y, z, 'b.-');
+grid on
+view([95 10]);
+drawnow
+ 
+idx = find(strcmp('UZ', { bd1{2:end,4} }));
+lab = [ bd1{idx+1,6} ];
+hold on
+plot3(x(idx), y(idx), z(idx), 'go', 'LineWidth', 2, 'MarkerSize', 10);
+hold off
+drawnow
+ 
+opts = coco_add_event(opts, 'UZ', 'PAR(3)', (-3:3)*pi/32);
+bd2 = coco(opts, 'alcont', @cone, 'sec', 'sol', 'sol', ...
+\qquad \qquad \qquad \qquad 'x', lab, {'PAR(3)' 'PAR(2)'}, [-pi/8 pi/8]);
+ 
+z = [bd2{2:end,10}];
+p = [bd2{2:end,11}];
+x = p(1,:);
+y = p(2,:);
+idx = find(strcmp('UZ', { bd2{2:end,4} }));
+lab = [ bd2{idx+1,6} ];
+hold on
+plot3(x(idx), y(idx), z(idx), 'ro', 'LineWidth', 2);
+hold off
+drawnow
+ 
+opts = coco_set(opts, 'cont', 'ItMX', [30 30]);
+for i=1:numel(lab)
+\qquad run = sprintf('sec_%d', lab(i));
+\qquad bd3 = coco(opts, 'alcont', @cone, run, 'sol', 'sol', ...
+\qquad \qquad \qquad \qquad \qquad 'sec', lab(i), {'PAR(1)' 'PAR(2)'}, [-2 2]);
+ 
+\qquad z = [bd3{2:end,10}];
+\qquad p = [bd3{2:end,11}];
+\qquad x = p(1,:);
+\qquad y = p(2,:);
+\qquad hold on
+\qquad plot3(x, y, z, 'g.-');
+\qquad hold off
+\qquad grid on;
+\qquad drawnow
+end
+\end{verbatim}
+
+\subsection{Empty zero problem}
+\begin{verbatim}
+opts = [];
+opts = coco_add_func(opts, @cone, 'active', 'G');
+opts = coco_set_parival(opts, 'G', 0);
+opts = coco_xchg_pars(opts, 'G', 'PAR(1)');
+opts = coco_add_func(opts, @plane, 'active', 'H');
+opts = coco_add_event(opts, 'UZ', 'H', 0);
+opts = coco_set(opts, 'cont', 'LogLevel', [1 0]);
+bd1 = coco(opts, 'alcont', [], 'ray1', 'isol', 'sol', ...
+\qquad \qquad \qquad \qquad \lbrack ], [0.4;0;0.5;0], 'PAR(3)', [0.1 2]);
+ 
+p = [bd1{2:end,11}];
+z = p(1,:);
+x = p(2,:);
+y = p(3,:);
+plot3(x, y, z, 'b.-');
+grid on
+drawnow
+ 
+idx = find(strcmp('UZ', { bd1{2:end,4} }));
+lab = [ bd1{idx+1,6} ];
+hold on
+plot3(x(idx), y(idx), z(idx), 'go', 'LineWidth', 2);
+hold off
+drawnow
+ 
+opts = coco_set_parival(opts, []); % reset initial values for subsequent runs
+opts = coco_xchg_pars(opts, 'G', 'H');
+opts = coco_add_event(opts, 'UZ', 'G', 0);
+bd2 = coco(opts, 'alcont', [], 'sec', 'sol', 'sol', ...
+\qquad \qquad \qquad \qquad 'ray1', lab, 'PAR(3)', [-2 2]);
+ 
+p = [bd2{2:end,11}];
+z = p(1,:);
+x = p(2,:);
+y = p(3,:);
+hold on
+plot3(x, y, z, 'k.-');
+hold off
+idx = find(strcmp('UZ', { bd2{2:end,4} }));
+lab = [ bd2{idx+1,6} ];
+hold on
+plot3(x(idx), y(idx), z(idx), 'ro', 'LineWidth', 2);
+hold off
+drawnow
+ 
+opts = coco_xchg_pars(opts, 'G', 'H');
+bd3 = coco(opts, 'alcont', [], 'ray2', 'sol', 'sol', ...
+\qquad \qquad \qquad \qquad 'sec', lab(1), 'PAR(3)', [-2 -0.1]);
+ 
+p = [bd3{2:end,11}];
+z = p(1,:);
+x = p(2,:);
+y = p(3,:);
+hold on
+plot3(x, y, z, 'b.-');
+hold off
+drawnow
+\end{verbatim}
+
+\newpage 
+
+\begin{thebibliography}{99}
+\bibitem{Allgower & Georg} E.L. Allgower and K. Georg, \emph{Numerical
+continuation methods: An introduction}, Springer-Verlag, 1990.
+
+\bibitem{Champneys et al 1996} A.R. Champneys, Y.A. Kuznetsov, and B.
+Sandstede, ``A numerical toolbox for homoclinic bifurcation analysis,'' 
+\emph{Internat. J. Bifur. Chaos Appl. Sci. Engrg. }\textbf{6(5)}, pp.
+867--887, 1996.
+
+\bibitem{Dercole & Kuznetsov 2005} F. Dercole and Y.A. Kuznetsov, ``\textsc{%
+slidecont}: An \textsc{auto} \textsc{97} driver for bifurcation analysis of
+Filippov systems,'' \emph{ACM Trans. Math. Software} \textbf{31(1)}, pp.
+95--119, 2005.
+
+\bibitem{Dhooge et al 2003} A. Dhooge, W. Govaerts, and Y.A. Kuznetsov, ``%
+\textsc{matcont}: A \textsc{matlab} package for numerical bifurcation
+analysis of ODEs,'' \emph{ACM Trans. Math. Software} \textbf{29(2)}, pp.
+141--164, 2003.
+
+\bibitem{Doedel et al 2005} E.J. Doedel, W. Govaerts, Y.A. Kuznetsov, and A.
+Dhooge, ``Numerical continuation of branch points of equilibria and periodic
+orbits,'' \emph{J. Bifur. Chaos Appl. Sci. Engrg.} \textbf{15(3)}, pp.
+841--860, 2005.
+
+\bibitem{Engelborghs et al 2002} K. Engelborghs, T. Luzyanina, and D. Roose,
+``Numerical bifurcation analysis of delay differential equations using 
+\textsc{dde-biftool},'' \emph{ACM Trans. Math. Software} \textbf{28(1)}, pp.
+1--21, 2002.
+
+\bibitem{Govaerts et al 2000} W. Govaerts, Y.A. Kuznetsov, and A. Dhooge,
+``Numerical continuation of bifurcations of limit cycles in \textsc{matlab}%
+,'' \emph{SIAM J. Sci. Comput.} \textbf{27(1)}, pp. 231--252, 2005.
+
+\bibitem{Govaerts 2000} W. Govaerts, ``Numerical bifurcation analysis for
+ODEs,'' \emph{J. Comput. Appl. Math.} \textbf{125(1-2)}, pp. 57--68, 2000.
+
+\bibitem{Guckenheimer 1998} J. Guckenheimer, ``Computer simulation and
+beyond--for the 21st century,'' \emph{Notices Amer. Math. Soc.} \textbf{45(9)%
+}, pp. 1120--1123, 1998.
+
+\bibitem{Keller 1987} H.B. Keller, \emph{Lectures on Numerical Methods in
+Bifurcation Problems}, Springer-Verlag, New York, 1987.
+
+\bibitem{Salinger et al 2005} A.G. Salinger, E.A. Burroughs, R.P. Pawlowski,
+E.T. Phipps, and L.A. Romero, ``Bifurcation tracking algorithms and software
+for large scale applications,'' \emph{J. Bifur. Chaos Appl. Sci. Engrg.} 
+\textbf{15(3)}, pp. 1015--1032, 2005.
+
+\bibitem{Szalai et al 2006} R. Szalai, G. Stepan, and S.J. Hogan,
+``Continuation of bifurcations in periodic delay-differential equations
+using characteristic matrices,'' \emph{SIAM J. Sci. Comput.} \textbf{28(4)},
+pp. 1301--1317, 2006.
+
+\bibitem{Thota and Dankowicz 2008} P. Thota and H. Dankowicz, ``On a
+Boundary-Value Formulation for the Continuation of Solution Trajectories in
+Hybrid Dynamical Systems and its Implementation in the Software Toolbox
+TC-HAT $\widehat{TC}$,'' \emph{SIAM J. App. Dyn. Syst.}, to appear, 2008.
+
+\bibitem{Wulff and Schebesch 2006} C. Wulff and A. Schebesch, ``Numerical
+continuation of symmetric periodic orbits,'' \emph{SIAM J. Appl. Dyn. Syst.} 
+\textbf{5(3)}, pp. 435--475, 2006.
+\end{thebibliography}
+
+\end{document}

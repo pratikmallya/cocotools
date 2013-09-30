@@ -1,0 +1,3 @@
+rfcon pneta
+rauto pneta pof dat -irs 1 -dsmax 0.159
+rauto pneta pob dat -irs 1 -ds - -dsmax 0.17

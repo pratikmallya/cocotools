@@ -1,0 +1,23 @@
+# svn propset svn:ignore -F ignore.txt `find . "(" -name "*.svn" -prune ")" -o "(" -name "data" -prune ")" -o -type d -print`
+files.txt
+*~
+*.aux
+*.bak
+*.dvi
+*.log
+*.pdf
+*.tar.gz
+*.tgz
+*.toc
+*.zip
+*.ps
+*.mat
+*.mexglx
+*.asv
+*.rej
+*.verb
+*.m.cmd
+*.o
+main
+data
+

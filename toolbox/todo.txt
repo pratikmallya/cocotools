@@ -1,0 +1,453 @@
+howto:
+  - doc files: contents.m, info.xml
+  - cross references in help text: matlabcolon
+  - open subfunction: edit func>subfunc ???
+  - print m-file: publish('atlas2_1.m', struct('format', 'pdf', 'evalCode', false, 'imageFormat', 'jpg', 'outputDir', '.'))
+  - add realistic perspective for surfaces: camproj and campos
+  - projections in 3d plots: see doc viewmtx
+
+bad bugs:
+	- fold detection wrt. period in canard fails, because ordering of parameters of
+    different types is wrong in close_efunc
+  - when initialising prcond.s=0, Hermite interpolation fails
+	
+adaptivity:
+	- in Marsden there was a problem with initial solutions that were different while they
+		while they are just copied verbatim (same initial point, different labels), in
+		examples on comparison of adaptation methods
+  - correct implementation of options like uidx='all', adaptation with no
+    parameters defined fails in tanh example, because xdim=udim and remesh
+    uses 'all' erroneously due to ambiguus definition
+  - estimated error seems to increase after remesh, a restart at an MXCL
+    point starts with large residuum+converged solution has larger error
+    than solution before remesh; this seems strange
+  # call update_h in continuation events
+  # demo atlas with re-meshing
+  # change remesh to take a point plus a set of additional vectors to remesh,
+    remove any semantics like 't' and 'TS', just an array of vectors that may be empty
+  # coco_remesh makes reference to fields maintained by cseg! Check this.
+    ==> remesh member function in cseg (?? see point above)
+  # remeshing of co-moving mesh (kappa part): does this work now after the
+    efunc_init fix? -- No :(
+  - update and optimize coco_remesh and coco_change_func
+  ? check residuum of base_chart after remeshing and save-restore (when
+    starting to continue in the opposite direction in 1d)
+
+bugs:
+  - core atlas codes: rename atlas event parameters to
+    coco_get_id('atlas', 'FP'), etc.
+	# in atlas2_* codes use r1 = cont.h * sqrt(1.1+tan(pi/cont.Ndirs)^2);
+		[tan missing, 1.1 instead of 1 to get edges strictly outside circle]
+  - handle parameter name aliases
+  - allow overwriting locate method with add_event for each parameter
+    separately
+  - if locating event fails always retry with locate method singular
+
+  o coco_tbx_set/coco_tbx_get/coco_set_tr functions
+
+  o write reference of coco_func_data [not necessary]
+
+  - move all construction code to coco_prob; fix for things like coco_prob([])
+
+  - function coco_signals for on-line help on signals
+  - unfolding variables for all functions (like ODEs)
+  - common argument parser for user function objects [coco_func_factory]
+  - restrict global permutations to linear solver, use unpermuted x
+    everywhere else
+
+atlas_1d_min:
+  - add demo with events exactly on mesh points (straight line, h=1)
+
+-----------------------------------------------------------------------------
+toolbox projects:
+
+For example, using a variation of an advancing front algorithm to follow codim-1 curves without setting up extended systems. Or to follow embedded sub-manifolds that satisfy certain optimality conditions. Another application is mesh generation on domains that are defined implicitly.
+-----------------------------------------------------------------------------
+Post-merge fixes:
+
+tutorial text:
+	- use event handler to distinguish between Hopf-points and neutral saddles,
+		this is a non-trivial but instructive example for using event-handlers
+
+from Harry:
+  - In lorentzdemo in Floquet folder, note initial residual in step 9.
+
+bugs:
+  - consolidate examples/test/covering
+  - reorganise arrays containing functions and f-data:
+    opts.efunc.events -> opts.events
+    opts.efunc.funcs  -> opts.funcs
+    directlty under opts: funcs, slots, events, signals, ...
+  - test scaling routine in lsol_splu with large problems
+  - update all corrector classes
+  - clean up interface to bddat; looks like bddat should become property
+    of AtlasBase and the functions should become member functions (including
+    print* and save* functions)
+  - acp_idx as part of argument when passing tangent, or function
+    get_acp_idx (for teaching uses)
+  - restrict write access to opts only to functions that really should have it;
+    for example, check all members of CurveSegment and AtlasBase
+
+FSM:
+  - (??) pass curr_chart to all bd-functions
+
+efunc:
+  - when adding internal parameters allow positional arguments
+      'before', 'after', '1', 'end', only top-level toolboxes should add
+      internal parameters (does this really make sense ??? -- yes, see
+      isola toolbox)
+  - allow rectangular systems (option in add_func)
+  - add support for structured return value of efunc_DFDX (this may not
+    be necessary, rather implement things like bandwidth reduction on
+    the level of equations)
+
+atlas_1d:
+	- use sum of angles between tangents and secant for step size control;
+    this will lead to acceptable results even at inflection points
+  - demo that tests all branches of cover_1d_ct
+
+coco:
+	- check semantics of coco_add_functionals; should match with both, matrix-vector
+		product and array-dot-product
+-----------------------------------------------------------------------------
+
+cover_1d_lsq:
+  - after add_point call function for performing measurements, which should be
+    interpolated and be available to monitor functions
+
+bugs:
+  - check if rlab is a string in coco_read_solution (accept string?)
+  - masking of components of tangent is necessary for vareqn=track;
+    make this option of add_func; use this for step size control;
+    change add_point and MX_check back to using midpoint (?)
+  - boundary condition in variational problem is wrong! -> use condition
+    with M' = M_old'; more research on stabilisation of iteration necessary
+  - allow ode45 syntax for odes throughout all toolboxes; this is necessary
+    for mh_imfcont for passing function data to the embedding ode; get rid
+    of persistent variables in imf_create_ode
+  - expand kappa and enable heuristic adaptation via update event
+
+cover1d/FSM:
+	- user defined error handler in state_correct?
+	- handle closed branches (???)
+
+coverkd:
+  - better remeshing algorithm; only consider immediate neighbourhood of chart
+    to resize
+  - use anisotropic distance function to avoid detecting charts as neighbours
+    when they really are on different almost parallel sheets (see example sphere)
+    (use the angle between TS and distance vector as parameter)
+  - allow specification of components for bounding box algorithm to reduce
+    dimension of bounding box space
+  - make connection between atlas and bd to allow plotting using both data
+    structures (save user data in atlas and bd)
+  - paging of charts
+  - print EP if no further boundary points available
+
+fdm:
+  - construct more specialised differentiation code for fixed sizes of argument
+    arrays that does not create index arrays all the time; this construction
+    consumes the main computation time (in ALCONT)
+
+collocation:
+  - explicit Jacobian is not used (demo pwlin)
+  - allow initial solution like in AUTO: user defines T and provides rescaled
+    solution over [0,1]; this allows T=0 segments for initialisation, which is
+    not supported right now
+	- allow individual parameters per segment and provide default conditions
+		for making all sets equal; this feature will reduce bandwidth and should
+		always be used; dimension of parameters should be equal per segment for
+		more efficient handling; provide index set that properly expands
+		parameters to avoid using repmat or kron all the time
+	- check inconsistency in kappa; implement integration weights
+	- include rescaling factors, parameters and possibly time (??) as
+		variables
+  - vectorise second order derivatives (no, use second order formulas as
+    in toolbox auto)
+	- write functions for remeshing and further manipulations so that a full
+		set of functions is available for other developers.
+
+	- adaptation, bandwidth reduction and computation of Floquet multipliers
+		in a forthcoming publication?
+
+coll_linsolve:
+	- develop and use bandwidth reduction (no, on equation level)
+  - bandwidth reduction on level of equations (add integral constraints
+    that will generally be split up; try to use periodic matrices)
+  - use block-decomposition with bordering as a preconditioner and post-iterate
+    the solution; this should allow for a dramatic speed-up; functions should
+    be allowed to create a (square) block for which a block-decomposition
+    will be employed; blocks should be named and collected under a prefix
+
+===========================================================================
+
+general:
+	- use mymatrix(:) or mymatrix(:)' instead of reshape to create row-
+		or column vector from arbitrary data.
+	- introduce a uniform naming convention for variables, for example,
+		for filenames such as FName, mfname, etc.
+	- associate sol with func and xsol with xfunc; better: add pointers to
+		dictionary entry of solution structures
+	- error tests in functions, in particular, check in and out arguments
+	- create correct data dependency tree to help clean up dependencies
+		and code
+
+efunc: [coco_add_func]
+  - allow inclusion of granularity information to be used for bandwidth
+    reduction on the equation level (for linear functionals and integral
+    conditions (non-linear functionals))
+  - allow collection of functions in square blocks; use this information for
+    block-elimination + bordering algorithm as (constant) preconditioner
+    (cascaded Newton method)
+
+mpbvp:
+	- allow parameters as variables (tori, Arnol'd tongues), introduce
+		appropriate index, which may be empty, and substitute and expand
+		list of parameters correctly
+	- compute interpolation error (on standard element)
+	- hybrid bvps: treat last boundary condition differently so that general
+		two-point hybrid bvps can be treated (last bc may depend on whole x,
+		not just boundary points like, for example, the periodicity condition),
+		specify as cell-array: {'hybrid', 'periodic'}; generalise periodic to
+		multi-segments but use only the very first and last boundary point;
+		initialisation in a loop over boundary conditions! compute bc in a loop
+		over boundary conditions
+	- compute proper L2-norm transforming the whole solution to [0 1],
+		such that the norm is independent of the number of segments
+	- allow parameters as additional variables (when more boundary
+		conditions than necessary are provided)? (OR: as user conditions)
+	- support all variants of vectorised/non-vectorised RHS and provided
+	  derivatives
+	- include remeshing strategy:
+		NTST = [ [INIT MIN MAX] ; ... ]
+	- pmap and dmap sparse (?)
+
+pocont:
+	- include amplitude as internal parameter in 'periodic'
+
+coco:
+	- handle events of test functions that might have two zeros within
+		a single step (to avoid having to use an unreasonably small max.
+		step size); this requires holding two curve segments instead of one
+    and using a moving bracket (bracketing algorithm) -> add support for
+    bracketing to cover_1d and the fsm (flush_all on exit)
+	- indicate for each user function if bandwidth reduction is required,
+		for this, allow attaching properties to user functions via argunemt
+		pairs of type ('name', value) in coco_add_func
+	- allow to exclude vars/pars that occur multiple times through equations
+		like a=b; b=c from adaptation aso.; it is a bit confusing that certain
+		variables get higher wheights when they are duplicated for convenience
+
+	! Is this problematic: mesh point on event within TOL??
+	- weight vector for norms and scalar products,
+		for example, NWTN: norm(w.*d)<TOL
+	- is it possible to write a check-settings function to validate
+		arguments for coco_set?
+
+cover_1d_cc:
+	- use Hermite extrapolation: poly_xcoeffs+poly_eval
+  - use projection condition with h=0 and predicted tangent
+	- when using qubic predictor, reduce step size until all criteria
+		are met -> should produce no (or extremely few) rejected steps
+
+===========================================================================
+
+from e-mails:
+
+
+==================
+
+> Something else to consider: in coco_print_data, the save routines are only 
+> used every so often. This is fine until you want to use a user function to 
+> add extra information to the bifurcation diagram... Because the MPBVP save 
+> routines add extra information to the opts.sol structure (i.e. the 
+> solution in a nice shape) the user function can only get access to this 
+> extra data on the (few) occasions that the data is saved. This is quite 
+> annoying if you want to define an extra solution norm, since I don't want 
+> to have to cut-and-paste the mpbvp_save_full code into my user function.
+
+The data you like to use is non-standard data and should not be accessed
+by user functions. In fact, in the current implementation I eliminated the
+possibility to access this data. A user function should not depend on it.
+The correct solution is as follows: if some particular bit of code is
+useful for users, we should write a public utility function that makes its
+functionality available to everyone.
+
+In fact, we really should start to collect ideas for such functions in a
+spirit similar to the functionality of rauto. Such functions would be
+useful for coco as well. Maybe a default plot routine for bifurcation
+diagrams? Or routines for extracting data about special points? At the
+moment we do all this making out hands dirty. If we provide functions for
+standard tasks, we also make user code independent of future changes to the
+data format. It seems worth to spend some time on that.
+
+==================
+
+> I don't have a problem with the initial tangent computation and
+> understand it completely. I am just wondering why the primary
+> continuation parameter is the first element of opts.cont.pidx. I don't
+> see why we need to do this. Instead, to be consistent with everything
+> else we have done, I think there should be an additional index vector
+> which specifies which elements of opts.cont.pidx are primary
+> continuation parameters.
+> 
+> For example, when I do continuation with the demo file as written, it
+> introduces two eta variables, the first of which is set to PAR(2) and
+> the second to H. On the other hand, if I exchange H for PAR(2) and do
+> continuation in H instead of PAR(2), it again introduces two eta
+> variables, the first of which is set to H and the second to PAR(2).
+> This doesn't make sense to me. I think the eta variables should be H
+> and PAR(2) in that order in both cases, but that there should be an
+> additional index vector that tells you which of these is the primary
+> continuation parameter.
+> 
+> This is obviously not a big deal and certainly doesn't change the
+> functionality. Either way is compatible with the write-up as I do not
+> identify a primary continuation parameter. I just think it is cleaner.
+
+I don't think that the current implementation should be changed. The active
+continuation parameters (all parameters that are added to the continuation)
+are, by default, added in the order they are defined with add_func. The
+reordering that you observe is in fact not a reordering, but an exchange
+of parameters. I decided to do this exchange explicitly, because it might
+affect parameters in different sets of parameter types (inactive and active,
+for example). To me, the most natural way seems to perform this exchange
+exactly as defined by the user with 'xchg_pars' and with the argument PARS
+passed to cover1d. This may not be very obvious for short parameter lists,
+but becomes clear if we have long lists of parameters.
+
+There is no disadvantage in doing this exchange explicitly and I also dont
+agree that it is contrary to the overall philosophy. In the code this
+information is used in two functions only: 'state_init' and
+'state_locate_cont.' At these points it is most natural to have the
+explicit reordering at hand, instead of using something like
+'pidx(pperm(1)),' because we actually never need the inverse permutation
+of the one stored in 'pperm.' Note that 'pperm' would not only contain
+the primary continuation parameters, but all parameters, because we might
+need to fix any set of parameters for locating special points.
+
+==================
+
+> As a little help to me, I knocked up a dependency graph for COCO with 
+> Matlab's depfun. You can find it at 
+> <http://seis.bris.ac.uk/~db9052/helpful.tgz>; it includes all the help 
+> strings as well. Try looking at the coco.html file. The code to generate 
+> it is included. (Add coco to the path then do "data = gendepgraph([],2); 
+> writedepmindmap('~/coco.mm',data,'COCO',1);" to generate a mindmap which 
+> can then be fed into Freemind <http://freemind.sourceforge.net/>).
+
+I didn't find it too useful. The main problem is, that it does not catch
+the heavy use of virtual functions as in our finite-state machines. For
+this deficiency, I would prefer not to add it to the official
+documentation. We could include information on how to generate it, but
+I wouldn't go any further.
+
+==================
+
+> A number of comments regarding set_parival:
+>
+> Line 45: what if no such argument is given?
+
+In this case, argument PARS must be empty and set_parival exits in line 38.
+
+> Line 67: what if vals is empty?
+
+Fixed.
+
+==================
+
+> Just curious: when you want to reshape a matrix to be a column or row 
+> vector, is there any particular reason you use reshape? You can instead 
+> use mymatrix(:) or mymatrix(:)' which is twice as fast.
+
+Didn't expect this to be faster. I thought that reshape just assigns some
+integers, while your code ought to expand and assign the whole array. I
+will check this out and use it in the future.
+
+==================
+
+> Just been doing some more investigations of this ill-conditioned 
+> Jacobian... I have some old code that computes the same thing but doesn't 
+> have this problem - in fact the Jacobian it generates has a condition 
+> number of ~10^5. In contrast, the code based on MP-BVP for the same 
+> conditions generates a Jacobian with condition number ~10^12. The only 
+> difference between the two is that in my original code I implicitly 
+> enforce continuity between collocation segments whereas in the MP-BVP code 
+> it is explicitly enforced. Just something to think about... If I get any 
+> time (which I probably won't as I'm trying to generate results for 
+> ECCOMAS very rapidly!) I'll look into changing MP-BVP to enforce 
+> implicitly and see what happens.
+
+I put it on the todo list. I will check this as well, but am not really
+convinced yet. With the explicit continuity condition we only expand the
+system's matrix with unit matricies. This expanded matrix is reducible and
+it is possible to reorder it in a way that shows that it should have the
+same condition number as the reduced matrix. This is a bit mysterious and
+could be related to some problems with UMFPACK. This would affect 'condest'
+and other functions. Of course, if matlab cannot handle the larger matix
+properly, we should reduce the system.
+
+==================
+
+> In case you are interested, I've implemented a wrapper for the Matlab 
+> fsolve routines so that COCO can use fsolve as the corrector (since it is 
+> more robust than the Newton with line-search method). It doesn't quite 
+> work like the coco_nwtn_step function since it does the complete 
+> correction in a single step (as far as COCO is concerned). Does this 
+> matter at all? Also, it does not implement the step start callback 
+> function since fsolve does not have provision for this (but it does allow 
+> the step end callback - but opts cannot be changed in this).
+> 
+> Shall I import it into the SVN? If so, would you rather it went in the 
+> coco directory or in a directory of it's own?
+
+This wrapper should be a toolbox of its own, consider it a first
+contributed toolbox! Essentially, this was the idea of coco: to make it
+possible to add such extensions without having to modify the core. Of
+course, we can ship it together with coco (if we are happy with its
+quality :). Just prepare some documentation and put it on your publication
+list.
+
+==================
+
+> Also, just wondering: the opts.nwtn.end_callback is only called if the 
+> Newton iteration is successful - perhaps this should be called even if it 
+> is not successful? It would then allow parameters to be tweaked and the 
+> correction re-tried.
+
+No, this is correct. In the case that It >= ItMX an exception is thrown.
+If this exception is cought at the correct place, this implicitly carries
+the information that the iteration needs to be re-initiated, including
+the tweaking of parameters. If this exception is not cought, then the
+computation is terminated anyway. The 'catch' part of the error handler
+is the correct place to do any tweaking. Essentially, the 'begin_callback'
+ought to do precisely this!
+
+==================
+
+> Minor comment: on line 10 in bddat_init, it should probably say 
+> 
+> if ~isfield(opts.efunc, 'op_idx')
+
+No, this is correct. We copy this information from 'efunc' to 'cont' to
+indicate that the initialisation has been done, that is, that all the other
+fields we create further down do exist.
+
+==================
+
+> OK. I have made similar graphs and was in the process of working on
+> the continuer section. In particular, I had asked you about the
+> possibility of using a default event handler to simplify
+> locate_events.
+
+Following up on our phone conversation on this: I did not split
+locate_events. I don't deem it important. It is a quite long function, but
+it does not seem to split naturally. I would like to keep it in one piece.
+
+> In particular, it
+> appears to me that the event handling part of cover1d is its own
+> finite-state machine embedded in the big finite-state machine.
+
+This observation is correct and I used it already to simplify my drawings
+of the FSM. In fact, we have two finite-state sub-machines: state_correct
+and the locate_events part.

@@ -1,0 +1,48 @@
+The decision about a license has not been made yet. The terms of use of the
+pre-release package as stated below apply until a final decision about
+licensing has been made.
+
+The statements below are somewhat outdated. If you use this package, please cite
+
+H. Dankowicz, F. Schilder; An extended continuation problem for bifurcation analysis
+in the presence of constraints, ASME Journal of Computational and Nonlinear Dynamics,
+Vol. 6, No. 3, 031003, 2011.
+
+
+							Generic continuation toolbox coco (pre-release)
+							===============================================
+                             Terms of use
+
+
+Copyright (C) 2007 Frank Schilder, Harry Dankowicz.
+All rights reserved.
+
+This pre-release is distributed in the hope that it will be useful, but without
+any warranty; without even the implied warranty of merchantability or fitness
+for a particular purpose.
+
+The design of this package is not in its final form. We will make changes to
+the package that will affect code based on it. We will not take any
+responsibility for the consequences of such changes. The file README shipped
+with this package lists a number of potential changes. This list may not be
+complete.
+
+You may use the contents of this package as a template for developing codes
+for continuation and for testing purposes.
+
+You may NOT re-distribute this package in its present or any modified form.
+
+You aggree that all publications of material related to this package are
+postponed until the authors published documentations of
+  * the continuation core COCO and
+  * the boundary-value problem package MPBVP
+in some citable form. If you derived code from this toolbox or if code of
+this toolbox influenced the development of your code in any way, we ask you
+to cite the publications above.
+
+You will delete all files of this package as soon as a first release is made
+available to the public by the authors. We will notify you about such a
+release.
+
+If you do not accept these terms you may NOT use this package until the
+authors release it to the public.

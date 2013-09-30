@@ -1,0 +1,10 @@
+#!/bin/csh
+
+set ignore_cmd = "svn propset svn:ignore -F ignore.txt"
+set files=( . `svn -R list` )
+foreach f ( $files )
+	if( -d "$f" ) then
+		echo $ignore_cmd $f
+		$ignore_cmd $f
+	endif
+end

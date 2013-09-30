@@ -1,0 +1,42 @@
+#!/bin/csh
+
+if( -e files.txt ) then
+	while( 1 )
+		echo -n "Local file list found, update list? [y/n] >"
+		set ans = $<
+		if( "$ans" == "" || "$ans" == "n" ) break
+		if( "$ans" == "y" ) then
+			echo "updating file list"
+			echo "." | tee files.txt
+			svn -R list | tee -a files.txt
+			break
+		endif
+	end
+else
+	echo "creating file list"
+	echo "." | tee files.txt
+	svn -R list | tee -a files.txt
+endif
+set files=`cat files.txt`
+
+set patterns    = ( "*.c" "*.h" "*.tex" "*.m" )
+set keywords    = "Date Revision Author HeadURL Id"
+set keyword_cmd = "svn propset svn:keywords"
+set eol_cmd     = "svn propset svn:eol-style native"
+set ignore_cmd  = "svn propset svn:ignore -F ignore.txt"
+
+foreach f ( $files )
+	foreach pat ( $patterns:q )
+		if( "$f" =~ "$pat" ) then
+			echo $keyword_cmd '"'$keywords'"' $f
+			$keyword_cmd "$keywords" $f
+			echo $eol_cmd $f
+			$eol_cmd $f
+		endif
+	end
+	if( -d "$f" ) then
+		echo $ignore_cmd $f
+		$ignore_cmd $f
+	endif
+end
+

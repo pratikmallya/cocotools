@@ -1,0 +1,39 @@
+function opts = doedel_create(opts, eps, th, vec, lam)
+
+[data1 xidx1] = coco_get_func_data(opts, 'col1.coll_fun', 'data', 'xidx');
+[data2 xidx2] = coco_get_func_data(opts, 'col2.coll_fun', 'data', 'xidx');
+[data3 xidx3] = coco_get_func_data(opts, 'alg1.alg_fun', 'data', 'xidx');
+[data4 xidx4] = coco_get_func_data(opts, 'alg2.alg_fun', 'data', 'xidx');
+
+opts = coco_add_functionals(opts, '', 'shared_pars', ...
+    [1, -1; 1, -1; 1, -1; 1, -1; 1, -1; 1, -1], [0; 0; 0; 0; 0; 0], ...
+    [xidx1(data1.p_idx) xidx1(data1.p_idx) xidx1(data1.p_idx)...
+    xidx2(data2.p_idx) xidx3(data3.p_idx) xidx4(data4.p_idx)]);
+
+evsdata.jac = data1.dfdxhan;
+[opts xidx] = coco_add_func(opts, 'evs', @doedel_evs, evsdata, 'zero', 'xidx', ...
+    [xidx1(data1.p_idx) xidx4(data4.x_idx)], 'x0', ...
+    [vec; lam]);
+
+data.vec_idx = xidx(end-2:end-1);
+data.lam_idx  = xidx(end);
+
+[opts xidx] = coco_add_func(opts, 'bcs', @doedel_bcs, [], 'zero', 'xidx', ...
+    [xidx1(data1.x0idx)  xidx2(data2.x0idx) ...
+    xidx3(data3.x_idx) xidx4(data4.x_idx) ...
+    data.vec_idx], 'x0', [eps; th]);
+
+data.eps_idx = xidx(end-2:end-1);
+data.th_idx  = xidx(end);
+
+opts = coco_add_functionals(opts, '', 'lin', [1, -1], 0, ...
+    [xidx1(data1.x1idx(1)) xidx2(data2.x1idx(1))], 'inactive', 'gap');
+
+opts = coco_add_parameters(opts, '', ...
+    [xidx1(data1.p_idx), data.eps_idx, ...
+    xidx1(data1.x1idx(2)), xidx2(data2.x1idx(2))], {'p1', 'p2', 'eps1', 'eps2', ...
+    'y12e', 'y22e'});
+
+opts = coco_add_slot(opts, 'doedel_save', @coco_save_data, data, 'save_full');
+
+end

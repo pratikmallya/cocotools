@@ -1,0 +1,10 @@
+#!/bin/sh
+
+sed -e "s/{//g" -e "s/}//g" $1.log > $1.log2
+sed -n -e "s/\(^[^ 	%]\)/>> \1/gp" -e "s/\(^[ 	]\)/   \1/gp" -e "s/^%/%/gp" -e "s/^$//gp" $1.m > $1.m.cmd
+if test $# -ge 2; then
+  diff -w $1.m $1.log2 | sed -e "s/^> .\{$2\}/> .../g" | sed -n -e "/^.\{0,73\}$/p" -e "/.\{74\}/s/\(^.\{70\}\)\(.*\)/\1 .../gp" | patch -r $1.rej -f -o $1-$3.verb $1.m.cmd 2>&1 > /dev/null
+else 
+  diff -w $1.m $1.log2 | sed -n -e "/^.\{0,73\}$/p" -e "/.\{74\}/s/\(^.\{70\}\)\(.*\)/\1 .../gp" | patch -r $1.rej -f -o $1.verb $1.m.cmd 2>&1 > /dev/null
+fi
+

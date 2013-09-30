@@ -1,0 +1,87 @@
+\newcommand{\mpbvp}{{\scshape Mpbvp}}
+
+\section{Collocation core mpbvp}
+
+\subsection{Discretisation of segmented BVPs}
+
+Segmented ODE over $r$ segments:
+%
+\begin{eqnarray*}
+\dot{x}_j & = & f_j(x_j,\lambda_j), \quad t\in[0,1], \quad j=1,\dots,r,
+\end{eqnarray*}
+%
+$f:\R^n\times R^m\to\R^n$. Right-hand sides $f_j$ don't need to be pairwise different. 
+
+\ToDo{different sets of parameters not supported yet [note made in todo list]}
+
+Segmented ODE with variational equation:
+%
+\begin{eqnarray*}
+\dot{x}_j & = & f_j(x,\lambda), \\
+\dot{M}_j & = & \left(f_j\right)_x(x,\lambda), \\
+M_j(0) + M_j(1) + \int_{0}^{1} M_j(\tau)^T M_j(\tau) \: d\tau
+	& = & 3 I_{n\times n}, \quad t\in[0,1], \quad j=1,\dots,r,
+\end{eqnarray*}
+%
+$f:\R^n\times R^m\to\R^n$, $M(t)\in\R^{n\times n}$.
+
+Toolbox \mpbvp\ constructs a discretisation for segmented ODEs and their variational equation. Boundary conditions for the segmented orbits must be provided by toolboxes that utilise \mpbvp. The collocation system is constructed in class \class{coll}.
+
+Discretised system over one segment (very compact functional notation):
+%
+\begin{eqnarray*}
+T \cdot \kappa(t) \cdot f(W\disc{x},\lambda) - \dot{W}\disc{x} & = & 0, \\
+T \cdot \kappa(t) \cdot f_x(W\disc{x},\lambda)\cdot W\disc{M} - \dot{W}\disc{M} & = & 0, \\
+W\disc{M}(0) + W\disc{M}(1) + \left(\sum_{i} \omega(t_i) \cdot
+	(W\disc{M})(t_i)^T (W\disc{M})(t_i)\right) - 3 I_{n\times n}
+	& = & 0,
+\end{eqnarray*}
+%
+where $W$ maps the supporting points in $\disc{x}$ to the values of $x(t)$ at the collocation points, $\dot{W}$ maps the supporting points to the values of the derivative $\dot{x}(t)$ at the collocation points, $T$ is the time of flight over one segment, $\kappa$ is a piecewise constant function, and $\omega(\tau)$ are the rescaled Gau\ss\ integration weights at collocation point $\tau$.
+
+The use of $T$ and $\kappa$ introduces a double scaling as follows:
+\begin{enumerate}
+\item The scaling $$T\cdot \dots$$ maps the unit interval $\tau\in[0,1]$ onto the actual time interval $t\in[0,T]$.
+\item The piecewise constant scaling $$\kappa(\tau)\cdot\dots$$ is an (inverse) blow-up scaling that maps the uniform reference mesh $$ \theta_k = 2k, \quad k=0,1,\dots,\mathrm{NTST}, $$ with equal-in-length subdivisions $\theta_k - \theta_{k-1} = 2$ onto a non-uniform mesh $$0 = \tau_0 < \tau_1 < \dots < \tau_{\mathrm{NTST}} = 1$$ of collocation intervals. Hence, the scaling function $\kappa$ satisfies $$ 2\cdot \mathrm{NTST}\cdot \int_0^1\kappa(\tau)\:d\tau = 1$$ and $\kappa(\tau)>0$ for all $\tau\in[0,1]$.
+
+There are several reasons for the blow-up scaling in this way:
+\begin{itemize}
+\item The collocation interval over one interval can be shifted to $\theta\in[-1,1]$. Hence, the linear maps from the base points onto the collocation points and onto the derivative at the collocation points are matrices that do not change over the intervals.
+\item For $\mathrm{NTST}\to\infty$ all derivatives of the collocation polynomials $p(\theta)=a_0+a_1 \theta + \dots + a_n\theta^n$ and, hence, all coefficients $a_k$, $k\geq 1$, will go to zero. This is not true for a collocation in $\tau$, where these coefficients will, in general, go to constants different from zero.
+\item Adaptation will most likely be based on computing the coefficients $a_k$, $k\geq 1$. This computation involves divided differences at some point, which is stable for $\mathrm{NTST}\to\infty$ if the differences are of order ${\cal{O}}(1)$. We achieve this by keeping the length of the collocation interval fixed.
+\end{itemize}
+\end{enumerate}
+
+BVPs can be set-up with or without variational equation. If variational equation is included, we have three different collocation systems, depending on their purpose:
+%
+\begin{enumerate}
+\item For \emph{computing} an \emph{initial solution} $M(t)$ we perform a homotopy in $\beta : 0\to 1$ with the equation
+%
+\begin{eqnarray*}
+\beta \cdot T_0 \cdot \kappa(t) \cdot f_x(W\disc{x}_0,\lambda)\cdot W\disc{M} - \dot{W}\disc{M} & = & 0, \\
+W\disc{M}(0) + W\disc{M}(1) + \left(\sum_{i} \omega(t_i) \cdot
+	(W\disc{M})(t_i)^T (W\disc{M})(t_i)\right) - 3 I_{n\times n}
+	& = & 0,
+\end{eqnarray*}
+%
+where $\disc{x}_0$ is an initial segmented solution to a BVP and we use the initial solution $M(t)|_{\beta=0} \equiv I_{n\times n}$ for the homotopy. This is coded in the set of functions starting with \class{var1}.
+
+\item For \emph{tracking} $M$ for use in monitor functions of type \emph{regular} or \emph{singular} we use a \emph{decoupled} equation
+%
+\begin{eqnarray*}
+T \cdot \kappa(t) \cdot f(W\disc{x},\lambda) - \dot{W}\disc{x} & = & 0, \\
+T \cdot \kappa(t) \cdot f_x(W\disc{y},\mu)\cdot W\disc{M} - \dot{W}\disc{M} & = & 0, \\
+W\disc{M}(0) + W\disc{M}(1) + \left(\sum_{i} \omega(t_i) \cdot
+	(W\disc{M})(t_i)^T (W\disc{M})(t_i)\right) - 3 I_{n\times n}
+	& = & 0,
+\end{eqnarray*}
+%
+where we set $\disc{y}\from \disc{x}$ and $\mu\from \lambda$ in the second equation after each Newton step. This is done implicitly, we simply omit the the derivatives of the second equation with espect to~$\disc{x}$ and~$\lambda$, which leads to a decoupled system of linear equations. This is always well posed, because the variational equation always has a unique solution. Also, since we ignore derivatives with respect to parameters, the tangent vector $\xi$ is computed correctly. That is, the components of $M$ in $\xi$ are zero, which means that the computation of $M$ is \emph{slaved} to the computation of $x$ [We need to show this.]. This is coded in the set of functions starting with \class{var2}.
+
+\item For \emph{using} $M$ in monitor functions and constraints we use the full collocation system as stated above, including all second-order derivatives in the linearisation. This is coded in the set of functions starting with \class{var}.
+\end{enumerate}
+
+The construction of a collocation system and its initial solution is split into individual steps as to allow switching between different modes of computing the variational equation in restarted computations.
+
+\subsection{Multipliers of segmented periodic orbits}
+

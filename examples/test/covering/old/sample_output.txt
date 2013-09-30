@@ -1,0 +1,481 @@
+************
+running demo run_0D_min_regular
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          5.00e-02  2.53e+00    0.0    0.0    0.0
+   1   1  1.00e+00  5.00e-02  1.25e-03  2.48e+00    0.0    0.0    0.0
+   2   1  1.00e+00  1.32e-03  8.66e-07  2.48e+00    0.0    0.0    0.0
+   3   1  1.00e+00  9.12e-07  4.15e-13  2.48e+00    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y
+    0  EP         1   1.6708e+00   2.4765e+00  00:00:00   7.4162e-01
+Elapsed time is 0.055328 seconds.
+
+************
+running demo run_0D_min_empty
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          4.46e+00  2.53e+00    0.0    0.0    0.0
+   1   1  1.91e-01  1.85e+00  3.68e+00  2.19e+00    0.0    0.0    0.0
+   2   1  1.79e-01  1.78e+00  3.07e+00  1.89e+00    0.0    0.0    0.0
+   3   1  1.64e-01  1.76e+00  2.61e+00  1.63e+00    0.0    0.0    0.0
+   4   1  1.47e-01  1.79e+00  2.26e+00  1.40e+00    0.0    0.0    0.0
+   5   1  1.27e-01  1.90e+00  2.00e+00  1.21e+00    0.0    0.0    0.0
+   6   1  1.05e-01  2.11e+00  1.82e+00  1.04e+00    0.0    0.0    0.0
+   7   1  8.19e-02  2.49e+00  1.69e+00  9.09e-01    0.0    0.0    0.0
+   8   1  5.94e-02  3.21e+00  1.61e+00  8.14e-01    0.0    0.0    0.0
+   9   1  3.78e-02  4.80e+00  1.56e+00  7.57e-01    0.0    0.0    0.0
+  10   1  1.72e-02  1.02e+01  1.55e+00  7.42e-01    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y
+   -1  MX         1          ---   2.5256e+00  00:00:00          ---
+Elapsed time is 0.063226 seconds.
+
+************
+running demo run_0D_min_singular
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          1.00e+00  2.53e+00    0.0    0.0    0.0
+Warning: Matrix is singular to working precision. 
+> In lsol_splu>solve at 50
+  In corr_nwtn>step at 114
+  In covering/private/state_co_correct at 7
+  In covering/private/covering_step at 7
+  In covering/private/covering_run at 29
+  In coco at 107
+  In demo>run_0D_min_singular at 84
+  In demo at 9
+  In demo at 17
+   1   8  0.00e+00       Inf       NaN       NaN    0.0    0.0    0.0
+   2   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+   3   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+   4   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+   5   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+   6   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+   7   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+   8   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+   9   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+  10   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y
+   -1  MX         1          ---   2.5256e+00  00:00:00          ---
+Elapsed time is 0.068453 seconds.
+
+************
+running demo run_0D_min_ev_BP0
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          5.00e-02  2.56e+00    0.0    0.0    0.0
+   1   1  1.00e+00  4.77e-02  1.14e-03  2.52e+00    0.0    0.0    0.0
+   2   1  1.00e+00  1.14e-03  6.44e-07  2.52e+00    0.0    0.0    0.0
+   3   1  1.00e+00  6.44e-07  2.06e-13  2.52e+00    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y
+    0  EP         1   1.7071e+00   2.5156e+00  00:00:00   7.0711e-01
+Elapsed time is 0.029641 seconds.
+
+************
+running demo run_0D_min_ev_BP1
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          5.00e-02  2.56e+00    0.0    0.0    0.0
+   1   1  1.00e+00  4.77e-02  1.14e-03  2.52e+00    0.0    0.0    0.0
+   2   1  1.00e+00  1.14e-03  6.44e-07  2.52e+00    0.0    0.0    0.0
+   3   1  1.00e+00  6.44e-07  2.06e-13  2.52e+00    0.0    0.0    0.0
+AtlasBase: warning: initial point is not inside computational domain
+AtlasBase: active boundary or terminal constraints were: EP
+
+ STEP   STEP SIZE  TYPE   LABEL            x        ||U||      TIME            y
+    0    0.00e+00  EX         1   1.7071e+00   2.5156e+00  00:00:00   7.0711e-01
+Elapsed time is 0.044872 seconds.
+
+************
+running demo run_0D_min_ev_BP2
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          5.00e-02  2.56e+00    0.0    0.0    0.0
+   1   1  1.00e+00  4.77e-02  1.14e-03  2.52e+00    0.0    0.0    0.0
+   2   1  1.00e+00  1.14e-03  6.44e-07  2.52e+00    0.0    0.0    0.0
+   3   1  1.00e+00  6.44e-07  2.06e-13  2.52e+00    0.0    0.0    0.0
+AtlasBase: warning: initial point is outside computational domain
+AtlasBase: active boundary or terminal constraints were: EP
+
+ STEP   STEP SIZE  TYPE   LABEL            x        ||U||      TIME            y
+    0    0.00e+00  EX         1   1.7071e+00   2.5156e+00  00:00:00   7.0711e-01
+Elapsed time is 0.046890 seconds.
+
+************
+running demo run_1D_min_regular
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          5.00e-02  2.63e+00    0.0    0.0    0.0
+   1   1  1.00e+00  4.77e-02  1.14e-03  2.61e+00    0.0    0.0    0.0
+   2   1  1.00e+00  1.14e-03  6.44e-07  2.61e+00    0.0    0.0    0.0
+   3   1  1.00e+00  6.44e-07  2.07e-13  2.61e+00    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y     atlas_FP     atlas_BP
+    0  EP         1   1.7071e+00   2.6131e+00  00:00:00   7.0711e-01   5.0000e-01  -3.3643e-01
+   10             2   1.9970e+00   2.8263e+00  00:00:00   7.7623e-02   5.4887e-02  -6.1225e-01
+   12  FP         3   2.0000e+00   2.8284e+00  00:00:00  -4.8640e-06  -3.4320e-08  -6.1520e-01
+   20  EP         4   1.8080e+00   2.6893e+00  00:00:00  -5.8914e-01  -4.1659e-01  -6.2005e-01
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          5.00e-02  2.63e+00    0.0    0.0    0.0
+   1   1  1.00e+00  4.77e-02  1.14e-03  2.61e+00    0.0    0.0    0.0
+   2   1  1.00e+00  1.14e-03  6.44e-07  2.61e+00    0.0    0.0    0.0
+   3   1  1.00e+00  6.44e-07  2.07e-13  2.61e+00    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y     atlas_FP     atlas_BP
+    0  EP         1   1.7071e+00   2.6131e+00  00:00:00   7.0711e-01  -5.0000e-01  -3.3643e-01
+   10             2   1.0776e+00   2.0762e+00  00:00:00   9.9698e-01  -7.0497e-01  -6.1225e-01
+   20  EP         3   4.1086e-01   1.2820e+00  00:00:00   8.0803e-01  -5.7136e-01  -6.1221e-01
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          5.00e-02  2.63e+00    0.0    0.0    0.0
+   1   1  1.00e+00  4.77e-02  1.14e-03  2.61e+00    0.0    0.0    0.0
+   2   1  1.00e+00  1.14e-03  6.44e-07  2.61e+00    0.0    0.0    0.0
+   3   1  1.00e+00  6.44e-07  2.07e-13  2.61e+00    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y     atlas_FP     atlas_BP
+    0  EP         1   1.7071e+00   2.6131e+00  00:00:00   7.0711e-01   5.0000e-01  -3.3643e-01
+Elapsed time is 1.173072 seconds.
+
+************
+running demo run_1D_min_empty
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          4.46e+00  2.63e+00    0.0    0.0    0.0
+   1   1  8.53e-02  4.26e+00  4.15e+00  2.51e+00    0.0    0.0    0.0
+   2   1  5.80e-02  6.05e+00  3.97e+00  2.44e+00    0.0    0.0    0.0
+   3   1  2.90e-02  1.19e+01  3.91e+00  2.41e+00    0.0    0.0    0.0
+   4   6  2.48e-05  4.30e+02  3.91e+00  2.41e+00    0.0    0.0    0.0
+   5   8  1.06e-06  2.50e+03  3.91e+00  2.41e+00    0.0    0.0    0.0
+   6   8  3.76e-07  3.54e+03  3.91e+00  2.41e+00    0.0    0.0    0.0
+   7   8  1.06e-06  2.50e+03  3.91e+00  2.41e+00    0.0    0.0    0.0
+   8   8  3.76e-07  3.54e+03  3.91e+00  2.41e+00    0.0    0.0    0.0
+   9   8  1.06e-06  2.50e+03  3.91e+00  2.41e+00    0.0    0.0    0.0
+  10   8  3.76e-07  3.54e+03  3.91e+00  2.41e+00    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y
+   -1  MX         1          ---   2.6322e+00  00:00:00          ---
+Elapsed time is 0.106955 seconds.
+
+************
+running demo run_1D_min_singular
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          1.00e+00  2.63e+00    0.0    0.0    0.0
+Warning: Matrix is singular to working precision. 
+> In lsol_splu>solve at 50
+  In corr_nwtn>step at 114
+  In covering/private/state_co_correct at 7
+  In covering/private/covering_step at 7
+  In covering/private/covering_run at 29
+  In coco at 107
+  In demo>run_1D_min_singular at 204
+  In demo at 9
+  In demo at 26
+   1   8  0.00e+00       Inf       NaN       NaN    0.0    0.0    0.0
+   2   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+   3   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+   4   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+   5   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+   6   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+   7   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+   8   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+   9   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+  10   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y
+   -1  MX         1          ---   2.6322e+00  00:00:00          ---
+Elapsed time is 0.111117 seconds.
+
+************
+running demo run_1D_min_regular_MX
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          5.00e-02  2.63e+00    0.0    0.0    0.0
+   1   1  1.00e+00  4.77e-02  1.14e-03  2.61e+00    0.0    0.0    0.0
+   2   1  1.00e+00  1.14e-03  6.44e-07  2.61e+00    0.0    0.0    0.0
+   3   1  1.00e+00  6.44e-07  2.07e-13  2.61e+00    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y
+    0  EP         1   1.7071e+00   2.6131e+00  00:00:00   7.0711e-01
+   10             2   1.9970e+00   2.8263e+00  00:00:00   7.7623e-02
+   12  FP         3   2.0000e+00   2.8284e+00  00:00:00  -4.8640e-06
+   15  MX         4   1.9621e+00   2.8015e+00  00:00:00  -2.7265e-01
+Elapsed time is 0.559816 seconds.
+
+************
+running demo run_1D_min_ev_BP0
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          5.00e-02  2.63e+00    0.0    0.0    0.0
+   1   1  1.00e+00  4.77e-02  1.14e-03  2.61e+00    0.0    0.0    0.0
+   2   1  1.00e+00  1.14e-03  6.44e-07  2.61e+00    0.0    0.0    0.0
+   3   1  1.00e+00  6.44e-07  2.07e-13  2.61e+00    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y     atlas_FP     atlas_BP
+    0  EP         1   1.7071e+00   2.6131e+00  00:00:00   7.0711e-01   5.0000e-01  -3.3643e-01
+    4  UYR        2   1.8660e+00   2.7321e+00  00:00:00   5.0000e-01   3.5355e-01  -6.3012e-01
+    4  UZ         3   1.8660e+00   2.7321e+00  00:00:00   5.0000e-01   3.5355e-01  -6.3012e-01
+    4  UYS        4   1.8660e+00   2.7321e+00  00:00:00   5.0000e-01   3.5355e-01  -6.3012e-01
+    8  UYR        5   1.9682e+00   2.8059e+00  00:00:00   2.5000e-01   1.7678e-01  -6.3044e-01
+    8  UZ         6   1.9682e+00   2.8059e+00  00:00:00   2.5000e-01   1.7678e-01  -6.3044e-01
+    8  UYS        7   1.9682e+00   2.8059e+00  00:00:00   2.5000e-01   1.7678e-01  -6.3044e-01
+   10             8   1.9970e+00   2.8263e+00  00:00:00   7.7623e-02   5.4887e-02  -6.1225e-01
+   12  UZ         9   2.0000e+00   2.8284e+00  00:00:01   0.0000e+00  -0.0000e+00  -6.1520e-01
+   12  UYR       10   2.0000e+00   2.8284e+00  00:00:01  -1.0443e-08  -7.8505e-09  -6.1520e-01
+   12  MUL       11   2.0000e+00   2.8284e+00  00:00:01  -2.1234e-08   3.3885e-06  -6.1520e-01
+   12  UYS       12   2.0000e+00   2.8284e+00  00:00:01  -2.1234e-08   3.3885e-06  -6.1520e-01
+   12  FP        13   2.0000e+00   2.8284e+00  00:00:01  -4.8640e-06  -3.4320e-08  -6.1520e-01
+   19  EP        14   1.8660e+00   2.7321e+00  00:00:01  -5.0000e-01  -3.5355e-01  -6.3049e-01
+Elapsed time is 1.423258 seconds.
+
+************
+running demo run_1D_min_ev_BP1
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          5.00e-02  2.63e+00    0.0    0.0    0.0
+   1   1  1.00e+00  4.77e-02  1.14e-03  2.61e+00    0.0    0.0    0.0
+   2   1  1.00e+00  1.14e-03  6.44e-07  2.61e+00    0.0    0.0    0.0
+   3   1  1.00e+00  6.44e-07  2.07e-13  2.61e+00    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y
+    0  EX         1   1.7071e+00   2.6131e+00  00:00:00   7.0711e-01
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          5.00e-02  2.63e+00    0.0    0.0    0.0
+   1   1  1.00e+00  4.77e-02  1.14e-03  2.61e+00    0.0    0.0    0.0
+   2   1  1.00e+00  1.14e-03  6.44e-07  2.61e+00    0.0    0.0    0.0
+   3   1  1.00e+00  6.44e-07  2.07e-13  2.61e+00    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y
+    0  EX         1   1.7071e+00   2.6131e+00  00:00:00   7.0711e-01
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          5.00e-02  2.63e+00    0.0    0.0    0.0
+   1   1  1.00e+00  4.77e-02  1.14e-03  2.61e+00    0.0    0.0    0.0
+   2   1  1.00e+00  1.14e-03  6.44e-07  2.61e+00    0.0    0.0    0.0
+   3   1  1.00e+00  6.44e-07  2.07e-13  2.61e+00    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y
+    0  EX         1   1.7071e+00   2.6131e+00  00:00:00   7.0711e-01
+Elapsed time is 0.233557 seconds.
+
+************
+running demo run_1D_min_ev_BP2
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          5.00e-02  2.63e+00    0.0    0.0    0.0
+   1   1  1.00e+00  4.77e-02  1.14e-03  2.61e+00    0.0    0.0    0.0
+   2   1  1.00e+00  1.14e-03  6.44e-07  2.61e+00    0.0    0.0    0.0
+   3   1  1.00e+00  6.44e-07  2.07e-13  2.61e+00    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y
+    0  EX         1   1.7071e+00   2.6131e+00  00:00:00   7.0711e-01
+Elapsed time is 0.080865 seconds.
+
+************
+running demo run_1D_min_regular
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          5.00e-02  2.63e+00    0.0    0.0    0.0
+   1   1  1.00e+00  4.77e-02  1.14e-03  2.61e+00    0.0    0.0    0.0
+   2   1  1.00e+00  1.14e-03  6.44e-07  2.61e+00    0.0    0.0    0.0
+   3   1  1.00e+00  6.44e-07  2.07e-13  2.61e+00    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y     atlas_FP     atlas_BP
+    0  EP         1   1.7071e+00   2.6131e+00  00:00:00   7.0711e-01   5.0000e-01  -3.3643e-01
+   10  FP         2   2.0000e+00   2.8284e+00  00:00:00   9.0671e-06  -1.0933e-09  -6.1343e-01
+   10             3   1.9997e+00   2.8282e+00  00:00:00  -2.4022e-02  -1.6986e-02  -6.1250e-01
+   20  EP         4   1.6639e+00   2.5799e+00  00:00:00  -7.4779e-01  -5.2877e-01  -6.1248e-01
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          5.00e-02  2.63e+00    0.0    0.0    0.0
+   1   1  1.00e+00  4.77e-02  1.14e-03  2.61e+00    0.0    0.0    0.0
+   2   1  1.00e+00  1.14e-03  6.44e-07  2.61e+00    0.0    0.0    0.0
+   3   1  1.00e+00  6.44e-07  2.07e-13  2.61e+00    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y     atlas_FP     atlas_BP
+    0  EP         1   1.7071e+00   2.6131e+00  00:00:00   7.0711e-01   5.0000e-01  -3.3643e-01
+   10             2   9.7598e-01   1.9758e+00  00:00:00   9.9971e-01   7.0690e-01  -6.1250e-01
+   20  EP         3   2.5221e-01   1.0044e+00  00:00:00   6.6394e-01   4.6948e-01  -6.1509e-01
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          5.00e-02  2.63e+00    0.0    0.0    0.0
+   1   1  1.00e+00  4.77e-02  1.14e-03  2.61e+00    0.0    0.0    0.0
+   2   1  1.00e+00  1.14e-03  6.44e-07  2.61e+00    0.0    0.0    0.0
+   3   1  1.00e+00  6.44e-07  2.07e-13  2.61e+00    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y     atlas_FP     atlas_BP
+    0  EP         1   1.7071e+00   2.6131e+00  00:00:00   7.0711e-01   5.0000e-01  -3.3643e-01
+Elapsed time is 1.211136 seconds.
+
+************
+running demo run_1D_min_empty
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          4.46e+00  2.63e+00    0.0    0.0    0.0
+   1   1  8.53e-02  4.26e+00  4.15e+00  2.51e+00    0.0    0.0    0.0
+   2   1  5.80e-02  6.05e+00  3.97e+00  2.44e+00    0.0    0.0    0.0
+   3   1  2.90e-02  1.19e+01  3.91e+00  2.41e+00    0.0    0.0    0.0
+   4   6  2.48e-05  4.30e+02  3.91e+00  2.41e+00    0.0    0.0    0.0
+   5   8  1.06e-06  2.50e+03  3.91e+00  2.41e+00    0.0    0.0    0.0
+   6   8  3.76e-07  3.54e+03  3.91e+00  2.41e+00    0.0    0.0    0.0
+   7   8  1.06e-06  2.50e+03  3.91e+00  2.41e+00    0.0    0.0    0.0
+   8   8  3.76e-07  3.54e+03  3.91e+00  2.41e+00    0.0    0.0    0.0
+   9   8  1.06e-06  2.50e+03  3.91e+00  2.41e+00    0.0    0.0    0.0
+  10   8  3.76e-07  3.54e+03  3.91e+00  2.41e+00    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y
+   -1  MX         1          ---   2.6322e+00  00:00:00          ---
+Elapsed time is 0.106859 seconds.
+
+************
+running demo run_1D_min_singular
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          1.00e+00  2.63e+00    0.0    0.0    0.0
+Warning: Matrix is singular to working precision. 
+> In lsol_splu>solve at 50
+  In corr_nwtn>step at 114
+  In covering/private/state_co_correct at 7
+  In covering/private/covering_step at 7
+  In covering/private/covering_run at 29
+  In coco at 107
+  In demo>run_1D_min_singular at 204
+  In demo at 9
+  In demo at 35
+   1   8  0.00e+00       Inf       NaN       NaN    0.0    0.0    0.0
+   2   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+   3   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+   4   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+   5   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+   6   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+   7   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+   8   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+   9   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+  10   8  3.91e-03       NaN       NaN       NaN    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y
+   -1  MX         1          ---   2.6322e+00  00:00:00          ---
+Elapsed time is 0.114727 seconds.
+
+************
+running demo run_1D_min_regular_MX
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          5.00e-02  2.63e+00    0.0    0.0    0.0
+   1   1  1.00e+00  4.77e-02  1.14e-03  2.61e+00    0.0    0.0    0.0
+   2   1  1.00e+00  1.14e-03  6.44e-07  2.61e+00    0.0    0.0    0.0
+   3   1  1.00e+00  6.44e-07  2.07e-13  2.61e+00    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y
+    0  EP         1   1.7071e+00   2.6131e+00  00:00:00   7.0711e-01
+   10  FP         2   2.0000e+00   2.8284e+00  00:00:00   9.0671e-06
+   10             3   1.9997e+00   2.8282e+00  00:00:00  -2.4022e-02
+   15  MX         4   1.9071e+00   2.7620e+00  00:00:00  -4.2084e-01
+Elapsed time is 0.718829 seconds.
+
+************
+running demo run_1D_min_ev_BP0
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          5.00e-02  2.63e+00    0.0    0.0    0.0
+   1   1  1.00e+00  4.77e-02  1.14e-03  2.61e+00    0.0    0.0    0.0
+   2   1  1.00e+00  1.14e-03  6.44e-07  2.61e+00    0.0    0.0    0.0
+   3   1  1.00e+00  6.44e-07  2.07e-13  2.61e+00    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y     atlas_FP     atlas_BP
+    0  EP         1   1.7071e+00   2.6131e+00  00:00:00   7.0711e-01   5.0000e-01  -3.3643e-01
+    4  UZ         2   1.8660e+00   2.7321e+00  00:00:00   5.0000e-01   3.5355e-01  -6.3064e-01
+    4  UYR        3   1.8660e+00   2.7321e+00  00:00:00   5.0000e-01   3.5355e-01  -6.3064e-01
+    4  UYS        4   1.8660e+00   2.7321e+00  00:00:00   5.0000e-01   3.5356e-01  -6.3064e-01
+    7  UYR        5   1.9682e+00   2.8059e+00  00:00:00   2.5000e-01   1.7678e-01  -6.3006e-01
+    7  UZ         6   1.9682e+00   2.8059e+00  00:00:00   2.5000e-01   1.7678e-01  -6.3006e-01
+    7  UYS        7   1.9682e+00   2.8059e+00  00:00:00   2.5000e-01   1.7677e-01  -6.3006e-01
+   10  FP         8   2.0000e+00   2.8284e+00  00:00:00   9.0671e-06  -1.0933e-09  -6.1343e-01
+   10  UZ         9   2.0000e+00   2.8284e+00  00:00:01   0.0000e+00  -0.0000e+00  -6.1343e-01
+   10  UYR       10   2.0000e+00   2.8284e+00  00:00:01  -4.7245e-08  -3.5327e-08  -6.1343e-01
+   10  MUL       11   2.0000e+00   2.8284e+00  00:00:01  -3.6754e-08  -6.4405e-06  -6.1343e-01
+   10  UYS       12   2.0000e+00   2.8284e+00  00:00:01  -3.6754e-08  -6.4405e-06  -6.1343e-01
+   10            13   1.9997e+00   2.8282e+00  00:00:01  -2.4022e-02  -1.6986e-02  -6.1250e-01
+   17  EP        14   1.8660e+00   2.7321e+00  00:00:01  -5.0000e-01  -3.5355e-01  -6.3085e-01
+Elapsed time is 1.402916 seconds.
+
+************
+running demo run_1D_min_ev_BP1
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          5.00e-02  2.63e+00    0.0    0.0    0.0
+   1   1  1.00e+00  4.77e-02  1.14e-03  2.61e+00    0.0    0.0    0.0
+   2   1  1.00e+00  1.14e-03  6.44e-07  2.61e+00    0.0    0.0    0.0
+   3   1  1.00e+00  6.44e-07  2.07e-13  2.61e+00    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y
+    0  EP         1   1.7071e+00   2.6131e+00  00:00:00   7.0711e-01
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          5.00e-02  2.63e+00    0.0    0.0    0.0
+   1   1  1.00e+00  4.77e-02  1.14e-03  2.61e+00    0.0    0.0    0.0
+   2   1  1.00e+00  1.14e-03  6.44e-07  2.61e+00    0.0    0.0    0.0
+   3   1  1.00e+00  6.44e-07  2.07e-13  2.61e+00    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y
+    0  EP         1   1.7071e+00   2.6131e+00  00:00:00   7.0711e-01
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          5.00e-02  2.63e+00    0.0    0.0    0.0
+   1   1  1.00e+00  4.77e-02  1.14e-03  2.61e+00    0.0    0.0    0.0
+   2   1  1.00e+00  1.14e-03  6.44e-07  2.61e+00    0.0    0.0    0.0
+   3   1  1.00e+00  6.44e-07  2.07e-13  2.61e+00    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y
+    0  EP         1   1.7071e+00   2.6131e+00  00:00:00   7.0711e-01
+   10  FP         2   2.0000e+00   2.8284e+00  00:00:00   9.0671e-06
+   10             3   1.9997e+00   2.8282e+00  00:00:00  -2.4022e-02
+   20  EP         4   1.7071e+00   2.6131e+00  00:00:00  -7.0711e-01
+Elapsed time is 0.735880 seconds.
+
+************
+running demo run_1D_min_ev_BP2
+
+    STEP   DAMPING               NORMS              COMPUTATION TIMES
+  IT SIT     GAMMA     ||d||     ||f||     ||U||   F(x)  DF(x)  SOLVE
+   0                          5.00e-02  2.63e+00    0.0    0.0    0.0
+   1   1  1.00e+00  4.77e-02  1.14e-03  2.61e+00    0.0    0.0    0.0
+   2   1  1.00e+00  1.14e-03  6.44e-07  2.61e+00    0.0    0.0    0.0
+   3   1  1.00e+00  6.44e-07  2.07e-13  2.61e+00    0.0    0.0    0.0
+
+ STEP  TYPE   LABEL            x        ||U||      TIME            y
+    0  EX         1   1.7071e+00   2.6131e+00  00:00:00   7.0711e-01
+Elapsed time is 0.079615 seconds.
+

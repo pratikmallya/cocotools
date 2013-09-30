@@ -1,0 +1,52 @@
+#!/bin/tcsh
+
+if( "$1" == "-test" ) then
+	set ecmd=echo
+	shift
+else
+	set ecmd=""
+endif
+
+if( $# != 2 && $# != 4 ) then
+	echo "usage: svn_copy_toolbox [-test] OLDNAME NEWNAME [OLDPREFIX NEWPREFIX]"
+	exit 1
+endif
+
+set oldtbx=$1
+set newtbx=$2
+if( $# == 2 ) then
+	set oldprf=$1
+	set newprf=$2
+else
+	set oldprf=$3
+	set newprf=$4
+endif
+
+if( -d "$oldtbx" ) then
+	echo "copying toolbox '$oldtbx' to '$newtbx'"
+	if( "$oldtbx" != "$newtbx" ) then
+		$ecmd svn copy $oldtbx $newtbx
+	endif
+	if( "$ecmd" == "" ) then
+		cd $newtbx
+	else
+		cd $oldtbx
+	endif
+	foreach f ( * )
+		set dst=`echo $f | sed s/^$oldprf/$newprf/`
+		if( -f "$f" && "$f" != "$dst" ) then
+			$ecmd svn move $f $dst
+		endif
+	end
+	cd private
+	foreach f ( * )
+		set dst=`echo $f | sed s/^$oldprf/$newprf/`
+		if( -f "$f" && "$f" != "$dst" ) then
+			$ecmd svn move $f $dst
+		endif
+	end
+else
+	echo "error: toolbox '$oldtbx' not found"
+	exit 1
+endif
+
